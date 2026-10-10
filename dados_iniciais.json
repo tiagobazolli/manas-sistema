@@ -1,0 +1,11 @@
+{
+  "config": {
+    "geral": {
+      "categorias": ["Blusa", "Camisa", "Calça", "Saia", "Short", "Vestido", "Macacão", "Casaco", "Calçado", "Bolsa", "Acessório", "Infantil", "Outros"],
+      "taxas": {"dinheiro": 0, "pix": 0, "debito": 1.99, "credito": 3.49, "parcelado": 4.99}
+    }
+  },
+  "contas": {
+    "7e8vrzh9kguanb4qq29g": {"ativa": true, "categoria": "Aluguel", "dia": 15, "inicio": "2026-10", "nome": "Aluguel da Loja", "valor": 978}
+  }
+}
