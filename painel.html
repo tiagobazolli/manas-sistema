@@ -1,0 +1,2038 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<!-- avisa o navegador que o app já tem tema escuro próprio, pra ele não "escurecer" as cores por cima -->
+<meta name="color-scheme" content="light dark" />
+<title>Assessor.IA</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.3.1/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.3.1/umd/react-dom.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.25.6/babel.min.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script>
+  // aplica o tema escolhido (Claro/Noturno) antes de desenhar, pra não piscar
+  try { var t = localStorage.getItem("assessor_tema"); if (t === "light" || t === "dark") document.documentElement.setAttribute("data-theme", t); } catch (e) {}
+</script>
+<style>
+  :root {
+    /* Tema claro (verde-água) e modo noturno (roxo e coral) — as mesmas
+       variáveis em todo o app, só os valores mudam. O usuário escolhe no
+       botão Claro/Noturno do topo (fica salvo no aparelho); quem nunca
+       escolheu segue o tema do celular/computador. */
+    --bg: #F3F6F5; --paper: #FFFFFF; --ink: #14231F; --muted: #66756F;
+    --line: #E3EAE7; --primary: #0F8F78; --primary-soft: #E9F6F2;
+    --amber: #C98510; --green: #1E9E61; --red: #D9472F;
+    --track: #EEF3F1; --hero: #0F8F78; --linha-ritmo: #0F8F78;
+    --entrou: #0F8F78; --saiu: #F2A93B;
+    --c1: #0F8F78; --c2: #F2A93B; --c3: #E0533D; --c4: #3D7BE0; --c5: #8D5BD8; --c6: #E46FA6; --c7: #7A8B86; --c8: #B7C3BF;
+    --al-alto-bg: #FDE8E4; --al-alto-fg: #7A2414; --al-alto-tag: #F6C9BF;
+    --al-medio-bg: #FFF1D6; --al-medio-fg: #6B4500; --al-medio-tag: #F8DDA6;
+    --al-bom-bg: #E3F5EC; --al-bom-fg: #135C3A; --al-bom-tag: #C3E9D5;
+    --al-info-bg: #ECE8FB; --al-info-fg: #3A2A8C; --al-info-tag: #D6CEF6;
+    --radius: 18px; --radius-sm: 10px;
+    --shadow: 0 1px 2px rgba(20,35,31,0.04);
+    box-sizing: border-box;
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #110F1C; --paper: #1C1930; --ink: #F1EEFF; --muted: #A49FC2;
+      --line: #2E2A4A; --primary: #9B7BFF; --primary-soft: #252140;
+      --amber: #FFC44D; --green: #3DD9A0; --red: #FF6B7D;
+      --track: #252140; --hero: linear-gradient(130deg, #6C4DF5 0%, #9B5CF0 48%, #FF7A59 100%); --linha-ritmo: #FF7A59;
+      --entrou: #3DD9A0; --saiu: #FF7A59;
+      --c1: #9B7BFF; --c2: #3DD9A0; --c3: #FF7A59; --c4: #4FB3FF; --c5: #FFC44D; --c6: #FF6B9D; --c7: #8A86A8; --c8: #5C5880;
+      --al-alto-bg: linear-gradient(140deg, #FF6B7D, #FF7A59); --al-alto-fg: #FFFFFF; --al-alto-tag: rgba(0,0,0,0.22);
+      --al-medio-bg: linear-gradient(140deg, #F5A623, #FFC44D); --al-medio-fg: #1C1930; --al-medio-tag: rgba(0,0,0,0.14);
+      --al-bom-bg: linear-gradient(140deg, #1FA37A, #3DD9A0); --al-bom-fg: #10261C; --al-bom-tag: rgba(0,0,0,0.14);
+      --al-info-bg: linear-gradient(140deg, #6C4DF5, #9B7BFF); --al-info-fg: #FFFFFF; --al-info-tag: rgba(0,0,0,0.22);
+      --shadow: none;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #110F1C; --paper: #1C1930; --ink: #F1EEFF; --muted: #A49FC2;
+    --line: #2E2A4A; --primary: #9B7BFF; --primary-soft: #252140;
+    --amber: #FFC44D; --green: #3DD9A0; --red: #FF6B7D;
+    --track: #252140; --hero: linear-gradient(130deg, #6C4DF5 0%, #9B5CF0 48%, #FF7A59 100%); --linha-ritmo: #FF7A59;
+    --entrou: #3DD9A0; --saiu: #FF7A59;
+    --c1: #9B7BFF; --c2: #3DD9A0; --c3: #FF7A59; --c4: #4FB3FF; --c5: #FFC44D; --c6: #FF6B9D; --c7: #8A86A8; --c8: #5C5880;
+    --al-alto-bg: linear-gradient(140deg, #FF6B7D, #FF7A59); --al-alto-fg: #FFFFFF; --al-alto-tag: rgba(0,0,0,0.22);
+    --al-medio-bg: linear-gradient(140deg, #F5A623, #FFC44D); --al-medio-fg: #1C1930; --al-medio-tag: rgba(0,0,0,0.14);
+    --al-bom-bg: linear-gradient(140deg, #1FA37A, #3DD9A0); --al-bom-fg: #10261C; --al-bom-tag: rgba(0,0,0,0.14);
+    --al-info-bg: linear-gradient(140deg, #6C4DF5, #9B7BFF); --al-info-fg: #FFFFFF; --al-info-tag: rgba(0,0,0,0.22);
+    --shadow: none;
+    color-scheme: dark;
+  }
+  html { scroll-padding-top: env(safe-area-inset-top, 0px); }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--ink);
+    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  input, button, select { font-family: inherit; }
+  button, input, select { border-radius: var(--radius-sm); }
+  button { transition: filter .15s ease, transform .05s ease, opacity .15s ease; }
+  button:not(:disabled):hover { filter: brightness(1.06); }
+  button:not(:disabled):active { transform: scale(0.98); }
+  button:disabled { opacity: .55; cursor: not-allowed; }
+  input:focus, select:focus { outline: 2px solid var(--primary); outline-offset: 1px; }
+
+  /* Navegação responsiva: barra fixa embaixo no celular, barra lateral
+     fixa à esquerda a partir de telas maiores — mesmo conteúdo, dois
+     lugares diferentes, trocado só via CSS (sem JS de resize). */
+  .app-sidebar { display: none; }
+  .app-bottomnav { display: block; }
+  .app-main { padding: 22px 16px 110px; max-width: 560px; margin: 0 auto; }
+  .pagina-estreita { max-width: 760px; }
+  .so-desktop { display: none; }
+  @media (min-width: 900px) { .so-desktop { display: inline-block; } }
+
+  /* Início: uma coluna no celular (saldo, alertas, rosca, categorias,
+     ritmo, contas), duas no tablet e três no computador — mesma lista de
+     cartões, só a grade e a ordem mudam via CSS. */
+  .dash { display: grid; grid-template-columns: minmax(0, 1fr); gap: 14px; }
+  .dash > * { min-width: 0; }
+  .d-lado { display: grid; gap: 14px; align-content: start; }
+  .d-lado > * { min-width: 0; }
+  .alertas-lista { display: flex; gap: 10px; overflow-x: auto; scrollbar-width: none; margin: 0 -16px; padding: 0 16px 2px; scroll-snap-type: x mandatory; }
+  .alertas-lista::-webkit-scrollbar { display: none; }
+  .alertas-lista > * { flex: 0 0 78%; scroll-snap-align: start; }
+  @media (min-width: 900px) {
+    .app-sidebar { display: flex; }
+    .app-bottomnav { display: none; }
+    .app-main { margin: 0 0 0 220px; max-width: 1200px; padding: 30px 30px 56px; }
+    .dash { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .dash .d-hero { order: 1; } .dash .d-rosca { order: 2; } .dash .d-ritmo { order: 3; }
+    .dash .d-alertas { order: 4; grid-column: span 2; } .dash .d-cats { order: 5; grid-column: span 2; }
+    .dash .d-historico { order: 2; grid-column: span 2; }
+    /* "Desde o início": sem ritmo nem alertas, então reorganiza a grade */
+    .dash.periodo .d-rosca { order: 1; }
+    .dash.periodo .d-lado { grid-column: span 2; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .dash .d-lado { order: 3; }
+    .alertas-lista { margin: 0; padding: 0; overflow: visible; display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); }
+  }
+  @media (min-width: 1240px) {
+    .dash { grid-template-columns: repeat(12, minmax(0, 1fr)); }
+    .dash .d-hero { grid-column: span 4; } .dash .d-rosca { grid-column: span 4; } .dash .d-ritmo { grid-column: span 4; }
+    .dash .d-alertas { grid-column: span 12; } .dash .d-cats { grid-column: span 7; }
+    .dash .d-historico { grid-column: span 8; }
+    .dash.periodo .d-rosca { order: 3; } .dash.periodo .d-cats { grid-column: span 8; }
+    .dash.periodo .d-lado { grid-column: span 12; }
+    .dash .d-lado { order: 6; grid-column: span 5; }
+  }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel" data-presets="react">
+const { useState, useEffect, useMemo } = React;
+
+// Backend na mesma origem (o próprio Railway serve essa página), então
+// não precisa de endereço absoluto nem de configurar CORS pra isso
+const API_URL = "";
+
+const RESUMO_VAZIO = {
+  usuario_nome: null,
+  mes_atual: null,
+  periodo_completo: { receita_total: 0, despesa_total: 0, saldo: 0, categorias: [], categorias_receita: [] },
+  pendencias: [],
+};
+
+// Itens de navegação do app — "ativo: false" é o que ainda não existe de
+// verdade (roadmap: educador financeiro, orçamentos, perfil), aparece
+// esmaecido com "em breve" em vez de sumir, pra já dar a ideia do produto
+// completo sem fingir uma função que não foi construída ainda.
+// "mobile: false" tira o item da barra debaixo no celular (space limitado).
+const NAV_ITENS = [
+  { id: "dashboard", label: "Início", icone: "inicio", ativo: true, mobile: true },
+  { id: "lancamentos", label: "Lançamentos", icone: "lancamentos", ativo: true, mobile: true },
+  { id: "educacao", label: "Educação", icone: "educacao", ativo: false, mobile: true },
+  { id: "orcamentos", label: "Orçamentos", icone: "orcamentos", ativo: false, mobile: true },
+  { id: "perfil", label: "Perfil", icone: "perfil", ativo: false, mobile: false },
+];
+
+// Ícones de traço fino (SVG desenhado aqui mesmo, sem biblioteca), no
+// lugar dos emojis — seguem a cor do texto (currentColor), então mudam
+// junto com o tema claro/noturno e com o item ativo da navegação.
+const ICONES = {
+  inicio: <><path d="M3.5 10.2 12 3.5l8.5 6.7" /><path d="M5.5 8.8V19a1.5 1.5 0 0 0 1.5 1.5h3.5V15h3v5.5H17a1.5 1.5 0 0 0 1.5-1.5V8.8" /></>,
+  lancamentos: <><path d="M6.5 3.5h11a1 1 0 0 1 1 1v16l-2.75-1.6L13 20.5l-2.75-1.6-2.75 1.6-2-1.2V4.5a1 1 0 0 1 1-1z" /><path d="M9 8.5h6M9 12h6M9 15.5h3.5" /></>,
+  educacao: <><path d="M2.5 9 12 4.5 21.5 9 12 13.5z" /><path d="M6.5 11.2v4.6c0 1.6 2.5 3 5.5 3s5.5-1.4 5.5-3v-4.6" /><path d="M21.5 9v5.5" /></>,
+  orcamentos: <><path d="M12 3.5a8.5 8.5 0 1 0 8.5 8.5H12z" /><path d="M15 3.9A8.5 8.5 0 0 1 20.1 9H15z" /></>,
+  perfil: <><circle cx="12" cy="8.5" r="4" /><path d="M4.5 20.5c.8-3.6 3.9-6 7.5-6s6.7 2.4 7.5 6" /></>,
+  mais: <path d="M12 5v14M5 12h14" />,
+  editar: <><path d="M14.5 5.5l4 4" /><path d="M4.5 19.5l1-4.2L16 4.8a1.5 1.5 0 0 1 2.1 0l1.1 1.1a1.5 1.5 0 0 1 0 2.1L8.7 18.5z" /></>,
+  lixeira: <><path d="M4.5 7h15" /><path d="M9.5 7V5a1 1 0 0 1 1-1h3a1 1 0 0 1 1 1v2" /><path d="M6.5 7l.8 12a1.5 1.5 0 0 0 1.5 1.5h6.4a1.5 1.5 0 0 0 1.5-1.5l.8-12" /><path d="M10 11v6M14 11v6" /></>,
+  cartao: <><rect x="3" y="5.5" width="18" height="13" rx="2" /><path d="M3 10h18M7 15h3" /></>,
+  clipe: <path d="M20 11.5l-7.6 7.6a5 5 0 0 1-7.1-7.1l8.1-8.1a3.3 3.3 0 0 1 4.7 4.7l-8 8a1.7 1.7 0 0 1-2.4-2.4l7.3-7.3" />,
+  dinheiro: <><rect x="2.5" y="6" width="19" height="12" rx="2" /><circle cx="12" cy="12" r="2.5" /><path d="M6 9.5v5M18 9.5v5" /></>,
+  camera: <><path d="M4.5 7.5h3l1.5-2h6l1.5 2h3a1.5 1.5 0 0 1 1.5 1.5v9a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 18V9a1.5 1.5 0 0 1 1.5-1.5z" /><circle cx="12" cy="13" r="3.5" /></>,
+};
+function Icone({ nome, tamanho = 20, espessura = 1.8, style }) {
+  return (
+    <svg width={tamanho} height={tamanho} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={espessura}
+      strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" style={{ flex: "none", display: "inline-block", verticalAlign: "middle", ...style }}>
+      {ICONES[nome]}
+    </svg>
+  );
+}
+
+const SANS = "'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
+const CATEGORIAS_DESPESA_PADRAO = [
+  "Moradia", "Transporte", "Alimentação", "Saúde e Bem-estar", "Educação",
+  "Assinaturas e Serviços", "Lazer e Entretenimento", "Família",
+  "Impostos e Taxas", "Investimentos e Reserva", "Compras Online",
+  "Pets", "Cuidados Pessoais e Beleza", "Presentes Dados", "Viagem", "Outros/Diversos",
+];
+const CATEGORIAS_RECEITA_PADRAO = [
+  "Salário / Renda Fixa", "Rendimentos e Investimentos", "Trabalho Extra / Comissões",
+  "Reembolsos e Devoluções", "Presentes e Doações Recebidas", "Outros/Diversos",
+];
+
+function fmt(v) {
+  return (v || 0).toLocaleString("pt-BR", { style: "currency", currency: "BRL", minimumFractionDigits: 0, maximumFractionDigits: 0 });
+}
+function fmt2(v) {
+  return (v || 0).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+}
+function nomeMesLongo(mesISO) {
+  const nomes = ["janeiro","fevereiro","março","abril","maio","junho","julho","agosto","setembro","outubro","novembro","dezembro"];
+  return nomes[parseInt(mesISO.split("-")[1], 10) - 1];
+}
+function nomeMes(mesISO) {
+  if (!mesISO) return "";
+  const [ano, mes] = mesISO.split("-");
+  const nomes = ["jan","fev","mar","abr","mai","jun","jul","ago","set","out","nov","dez"];
+  return `${nomes[parseInt(mes, 10) - 1]}/${ano}`;
+}
+
+// ---------- Peças visuais do Início (layout novo, tema claro/noturno) ----------
+// Cores das categorias: variáveis --c1..--c8 do CSS, que mudam junto com o
+// tema. A 8ª fatia da rosca é sempre "outras" (soma do que sobrou).
+const CORES_CAT = ["var(--c1)", "var(--c2)", "var(--c3)", "var(--c4)", "var(--c5)", "var(--c6)", "var(--c7)", "var(--c8)"];
+
+const CARTAO = { background: "var(--paper)", border: "1px solid var(--line)", borderRadius: "var(--radius)", boxShadow: "var(--shadow)", padding: 16 };
+const ROTULO = { fontSize: 11, fontWeight: 700, color: "var(--muted)", textTransform: "uppercase", letterSpacing: 0.6 };
+
+function fmtK(v) {
+  return v >= 1000 ? `${(v / 1000).toLocaleString("pt-BR", { maximumFractionDigits: 1 })}k` : String(Math.round(v));
+}
+function pct(x) {
+  return `${x > 0 ? "+" : ""}${Math.round(x * 100)}%`;
+}
+// passo "redondo" pras linhas de grade (1, 2 ou 5 × potência de 10), com no máximo 4 faixas
+function passoGrade(max) {
+  const bruto = max / 4, pot = Math.pow(10, Math.floor(Math.log10(bruto || 1)));
+  return [1, 2, 5, 10].map((m) => m * pot).find((p) => p >= bruto) || pot * 10;
+}
+
+// Agrupa as categorias pra rosca: as 7 maiores + "outras"
+function fatiasRosca(categorias) {
+  const ord = [...categorias].sort((a, b) => b.valor - a.valor);
+  if (ord.length <= 8) return ord;
+  const resto = ord.slice(7).reduce((s, c) => s + c.valor, 0);
+  return [...ord.slice(0, 7), { nome: "Outras", valor: resto, outras: true }];
+}
+
+function Rosca({ fatias, total, rotulo, tamanho = 150, espessura = 20, aoClicar }) {
+  const r = (tamanho - espessura) / 2, circ = 2 * Math.PI * r, meio = tamanho / 2;
+  const soma = fatias.reduce((s, f) => s + f.valor, 0) || 1;
+  let deslocamento = 0;
+  return (
+    <svg width={tamanho} height={tamanho} viewBox={`0 0 ${tamanho} ${tamanho}`} style={{ flex: "none", fontFamily: SANS }} role="img" aria-label="Gastos por categoria">
+      <circle cx={meio} cy={meio} r={r} fill="none" stroke="var(--track)" strokeWidth={espessura} />
+      {fatias.map((f, i) => {
+        const tam = (f.valor / soma) * circ;
+        const el = (
+          <circle key={f.nome} cx={meio} cy={meio} r={r} fill="none" stroke={CORES_CAT[i]} strokeWidth={espessura}
+            strokeDasharray={`${Math.max(tam - (fatias.length > 1 ? 2 : 0), 0.5)} ${circ}`} strokeDashoffset={-deslocamento}
+            transform={`rotate(-90 ${meio} ${meio})`}
+            onClick={() => !f.outras && aoClicar && aoClicar(f.nome)} style={{ cursor: !f.outras && aoClicar ? "pointer" : "default" }}>
+            <title>{`${f.nome}: ${fmt2(f.valor)}`}</title>
+          </circle>
+        );
+        deslocamento += tam;
+        return el;
+      })}
+      <text x="50%" y={meio - 7} textAnchor="middle" fontSize="11" fill="var(--muted)">{rotulo}</text>
+      <text x="50%" y={meio + 14} textAnchor="middle" fontSize={tamanho > 150 ? 19 : 16} fontWeight="800" fill="var(--ink)">{fmt(total)}</text>
+    </svg>
+  );
+}
+
+function CartaoRosca({ categorias, total, rotulo, aoClicar }) {
+  const fatias = fatiasRosca(categorias);
+  return (
+    <div className="d-rosca" style={{ ...CARTAO, display: "flex", flexWrap: "wrap", gap: 16, alignItems: "center", justifyContent: "center" }}>
+      <Rosca fatias={fatias} total={total} rotulo={rotulo} aoClicar={aoClicar} />
+      <div style={{ display: "flex", flexDirection: "column", gap: 5, fontSize: 12, flex: "1 1 150px", minWidth: 0 }}>
+        {fatias.map((f, i) => (
+          <button key={f.nome} onClick={() => !f.outras && aoClicar(f.nome)} disabled={f.outras}
+            style={{ display: "flex", alignItems: "center", gap: 7, background: "none", border: "none", padding: 0, color: "var(--ink)", fontSize: 12, textAlign: "left", cursor: f.outras ? "default" : "pointer", opacity: 1 }}>
+            <span style={{ width: 9, height: 9, borderRadius: "50%", background: CORES_CAT[i], flex: "none" }} />
+            <span style={{ flex: 1, minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{f.nome}</span>
+            <b>{total > 0 ? Math.round((f.valor / total) * 100) : 0}%</b>
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// Linha do gasto acumulado no mês, comparada com o "seu normal" (o gasto
+// acumulado médio dos últimos meses em cada dia — já inclui o aluguel do
+// dia 1, a fatura do dia 10 etc.) e, no mês corrente, com a projeção do
+// fim do mês que vem pronta do backend.
+function GraficoRitmo({ painel }) {
+  const W = 340, H = 180, pad = { l: 34, r: 10, t: 10, b: 22 };
+  const iw = W - pad.l - pad.r, ih = H - pad.t - pad.b;
+  const dias = painel.dias_no_mes, acum = painel.acumulado.length ? painel.acumulado : [0];
+  const normal = painel.normal_acumulado;
+  const media = normal ? normal[normal.length - 1] : null;
+  const ultimo = acum[acum.length - 1];
+  const proj = painel.projecao;
+  const maxV = Math.max(ultimo, media || 0, proj || 0, 100);
+  const passo = passoGrade(maxV), topo = Math.ceil(maxV / passo) * passo;
+  const x = (d) => pad.l + ((d - 1) / Math.max(dias - 1, 1)) * iw;
+  const y = (v) => pad.t + ih - (v / topo) * ih;
+  const pts = acum.map((v, i) => [x(i + 1), y(v)]);
+  const caminho = pts.map((p, i) => `${i ? "L" : "M"}${p[0].toFixed(1)} ${p[1].toFixed(1)}`).join(" ");
+  const fim = pts[pts.length - 1];
+  const grade = [];
+  for (let v = 0; v <= topo + 0.01; v += passo) grade.push(v);
+  const yProj = proj ? y(proj) : null;
+  return (
+    <svg viewBox={`0 0 ${W} ${H}`} width="100%" style={{ fontFamily: SANS, display: "block" }} role="img" aria-label="Gasto acumulado no mês">
+      <defs>
+        <linearGradient id="gradRitmo" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stopColor="var(--linha-ritmo)" stopOpacity="0.35" />
+          <stop offset="1" stopColor="var(--linha-ritmo)" stopOpacity="0" />
+        </linearGradient>
+      </defs>
+      {grade.map((v) => (
+        <g key={v}>
+          <line x1={pad.l} x2={W - pad.r} y1={y(v)} y2={y(v)} stroke="var(--line)" />
+          <text x={pad.l - 6} y={y(v) + 3} textAnchor="end" fontSize="9" fill="var(--muted)">{fmtK(v)}</text>
+        </g>
+      ))}
+      {[1, Math.round(dias / 2), dias].map((d) => (
+        <text key={d} x={x(d)} y={H - 6} textAnchor={d === 1 ? "start" : d === dias ? "end" : "middle"} fontSize="9" fill="var(--muted)">dia {d}</text>
+      ))}
+      {media > 0 && (
+        <>
+          <path d={normal.map((v, i) => `${i ? "L" : "M"}${x(i + 1).toFixed(1)} ${y(v).toFixed(1)}`).join(" ")} fill="none" stroke="var(--muted)" strokeWidth="1.5" strokeDasharray="4 4" />
+        </>
+      )}
+      {proj > 0 && (
+        <>
+          <line x1={fim[0]} y1={fim[1]} x2={x(dias)} y2={yProj} stroke="var(--linha-ritmo)" strokeWidth="1.5" strokeDasharray="2 4" />
+        </>
+      )}
+      <path d={`${caminho} L${fim[0].toFixed(1)} ${y(0)} L${pts[0][0].toFixed(1)} ${y(0)} Z`} fill="url(#gradRitmo)" />
+      <path d={caminho} fill="none" stroke="var(--linha-ritmo)" strokeWidth="2.5" strokeLinejoin="round" strokeLinecap="round" />
+      <circle cx={fim[0]} cy={fim[1]} r="4.5" fill="var(--linha-ritmo)" stroke="var(--paper)" strokeWidth="2" />
+    </svg>
+  );
+}
+
+function CartaoRitmo({ painel }) {
+  const normalAteHoje = painel.normal_acumulado ? painel.normal_acumulado[painel.dia_referencia - 1] : null;
+  const ultimo = painel.acumulado.length ? painel.acumulado[painel.acumulado.length - 1] : 0;
+  const dif = normalAteHoje > 0 ? (ultimo - normalAteHoje) / normalAteHoje : null;
+  let resumo = null;
+  if (dif !== null) {
+    const cor = dif > 0.1 ? "var(--red)" : dif > 0 ? "var(--amber)" : "var(--green)";
+    const txt = Math.abs(dif) < 0.03 ? "no seu ritmo normal" : `${pct(dif)} ${dif > 0 ? "acima" : "abaixo"} do seu normal`;
+    resumo = <span style={{ fontSize: 11.5, fontWeight: 700, color: cor, textAlign: "right" }}>{txt}</span>;
+  }
+  return (
+    <div className="d-ritmo" style={CARTAO}>
+      <div style={{ display: "flex", justifyContent: "space-between", gap: 8, alignItems: "baseline", marginBottom: 4 }}>
+        <span style={ROTULO}>Ritmo do mês</span>
+        {resumo}
+      </div>
+      <div style={{ maxWidth: 520 }}><GraficoRitmo painel={painel} /></div>
+      <div style={{ display: "flex", flexWrap: "wrap", gap: "4px 14px", fontSize: 11.5, color: "var(--muted)", marginTop: 4 }}>
+        <span><span style={{ display: "inline-block", width: 14, borderTop: "2.5px solid var(--linha-ritmo)", verticalAlign: "middle", marginRight: 5 }} />gasto até hoje: <b style={{ color: "var(--ink)" }}>{fmt(ultimo)}</b></span>
+        {!!painel.normal_acumulado && <span><span style={{ display: "inline-block", width: 14, borderTop: "2px dashed var(--muted)", verticalAlign: "middle", marginRight: 5 }} />seu normal no mês: <b style={{ color: "var(--ink)" }}>{fmt(painel.normal_acumulado[painel.normal_acumulado.length - 1])}</b></span>}
+        {painel.projecao > 0 && <span><span style={{ display: "inline-block", width: 14, borderTop: "2px dotted var(--linha-ritmo)", verticalAlign: "middle", marginRight: 5 }} />projeção: <b style={{ color: "var(--linha-ritmo)" }}>{fmt(painel.projecao)}</b></span>}
+      </div>
+      {!painel.normal_acumulado && (
+        <div style={{ fontSize: 11.5, color: "var(--muted)" }}>Com o extrato de mais um mês, eu mostro aqui o seu ritmo normal pra comparar.</div>
+      )}
+    </div>
+  );
+}
+
+const ESTILO_ALERTA = {
+  alto: ["var(--al-alto-bg)", "var(--al-alto-fg)", "var(--al-alto-tag)"],
+  medio: ["var(--al-medio-bg)", "var(--al-medio-fg)", "var(--al-medio-tag)"],
+  bom: ["var(--al-bom-bg)", "var(--al-bom-fg)", "var(--al-bom-tag)"],
+  info: ["var(--al-info-bg)", "var(--al-info-fg)", "var(--al-info-tag)"],
+};
+
+function PontosDeAtencao({ painel, aoClicar }) {
+  let alertas = painel ? painel.alertas : [];
+  if (painel && alertas.length === 0) {
+    alertas = painel.meses_historico > 0
+      ? [{ nivel: "bom", rotulo: "Tudo certo", titulo: "Gastos dentro do normal", texto: "Nenhuma categoria passou da sua média dos últimos meses.", categoria: null }]
+      : [{ nivel: "info", rotulo: "Em breve", titulo: "Ainda estou te conhecendo", texto: "Com o extrato de mais um mês, eu começo a avisar quando um gasto passar do seu normal.", categoria: null }];
+  }
+  if (!alertas.length) return null;
+  return (
+    <div className="d-alertas">
+      <div style={{ ...ROTULO, marginBottom: 8 }}>Pontos de atenção</div>
+      <div className="alertas-lista">
+        {alertas.map((a, i) => {
+          const [bg, fg, tag] = ESTILO_ALERTA[a.nivel] || ESTILO_ALERTA.info;
+          return (
+            <button key={i} onClick={() => a.categoria && aoClicar(a.categoria)}
+              style={{ background: bg, color: fg, border: "none", borderRadius: 16, padding: 14, textAlign: "left", cursor: a.categoria ? "pointer" : "default", fontFamily: SANS, display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 4 }}>
+              <span style={{ background: tag, color: fg, fontSize: 10, fontWeight: 700, padding: "3px 9px", borderRadius: 999 }}>{a.rotulo}</span>
+              <span style={{ fontSize: 14.5, fontWeight: 800, marginTop: 4 }}>{a.titulo}</span>
+              <span style={{ fontSize: 12, lineHeight: 1.45, opacity: 0.92 }}>{a.texto}</span>
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+// Lista de categorias com barra e um traço marcando a média dos últimos
+// meses — dá pra ver na hora o que passou do normal. Toque abre o detalhe.
+function CategoriasVsMedia({ categorias, comMedia, aoClicar }) {
+  const cores = {};
+  fatiasRosca(categorias).forEach((f, i) => { cores[f.nome] = CORES_CAT[i]; });
+  const max = Math.max(...categorias.map((c) => Math.max(c.valor, comMedia && c.media ? c.media : 0)), 1);
+  return (
+    <div className="d-cats" style={CARTAO}>
+      <div style={{ ...ROTULO, marginBottom: 6 }}>{comMedia ? "Por categoria · traço = sua média dos últimos meses" : "Por categoria"}</div>
+      {categorias.map((c) => {
+        // !! evita que média 0 (categoria sem histórico) vire um "0" solto na tela
+        const temMedia = !!(comMedia && c.media > 0);
+        const novaNoMes = comMedia && !temMedia;
+        const corDif = !temMedia ? "var(--muted)" : c.dif > 0.15 ? "var(--red)" : c.dif > 0.05 ? "var(--amber)" : "var(--green)";
+        return (
+          <button key={c.nome} onClick={() => aoClicar(c.nome)}
+            style={{ display: "grid", gridTemplateColumns: "10px minmax(0,1fr) auto", gap: 10, alignItems: "center", width: "100%", padding: "7px 0", background: "none", border: "none", color: "var(--ink)", fontFamily: SANS, textAlign: "left", cursor: "pointer" }}>
+            <span style={{ width: 10, height: 10, borderRadius: "50%", background: cores[c.nome] || "var(--c8)" }} />
+            <div style={{ minWidth: 0 }}>
+              <div style={{ display: "flex", justifyContent: "space-between", gap: 8, fontSize: 13 }}>
+                <span style={{ fontWeight: 600, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{c.nome}</span>
+                {temMedia && <span style={{ color: corDif, fontWeight: 700, fontSize: 11.5, flex: "none" }}>{pct(c.dif)}</span>}
+                {novaNoMes && <span style={{ color: "var(--muted)", fontWeight: 600, fontSize: 11, flex: "none" }}>nova no mês</span>}
+              </div>
+              <div style={{ position: "relative", height: 6, background: "var(--track)", borderRadius: 6, marginTop: 5 }}>
+                <div style={{ position: "absolute", left: 0, top: 0, bottom: 0, width: `${(c.valor / max) * 100}%`, background: cores[c.nome] || "var(--c8)", borderRadius: 6 }} />
+                {temMedia && <div title={`sua média: ${fmt2(c.media)}`} style={{ position: "absolute", top: -3, left: `calc(${(c.media / max) * 100}% - 1px)`, width: 2, height: 12, background: "var(--ink)", borderRadius: 1 }} />}
+              </div>
+            </div>
+            <b style={{ fontSize: 13, whiteSpace: "nowrap" }}>{fmt(c.valor)}</b>
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+// Entrou x saiu de cada mês (visão "Desde o início"). Barras lado a lado
+// porque o que importa é comparar as duas no mesmo mês; embaixo de cada
+// mês vai o que sobrou (ou faltou). Tocar num mês abre aquele mês.
+function GraficoMesAMes({ historico, mesCorrente, aoEscolherMes }) {
+  const n = historico.length;
+  const larguraMes = 52, pad = { l: 36, r: 8, t: 12, b: 40 };
+  // desenha na largura real do cartão (medida), pra texto não crescer nem
+  // encolher; se não couber 52px por mês, rola pro lado (celular)
+  const ref = React.useRef(null);
+  const [largura, setLargura] = useState(340);
+  useEffect(() => {
+    if (!ref.current) return;
+    const medir = () => ref.current && setLargura(ref.current.clientWidth || 340);
+    medir();
+    const ro = window.ResizeObserver ? new ResizeObserver(medir) : null;
+    if (ro) ro.observe(ref.current); else window.addEventListener("resize", medir);
+    return () => { if (ro) ro.disconnect(); else window.removeEventListener("resize", medir); };
+  }, []);
+  const precisa = pad.l + pad.r + n * larguraMes;
+  const W = Math.max(largura, precisa), H = 220;
+  const rolar = precisa > largura;
+  const iw = W - pad.l - pad.r, ih = H - pad.t - pad.b;
+  const maxV = Math.max(...historico.map((m) => Math.max(m.receita, m.despesa)), 100);
+  const passo = passoGrade(maxV), topo = Math.ceil(maxV / passo) * passo;
+  const y = (v) => pad.t + ih - (v / topo) * ih;
+  const gw = iw / Math.max(n, 1), bw = Math.min(16, gw * 0.3);
+  const grade = [];
+  for (let v = 0; v <= topo + 0.01; v += passo) grade.push(v);
+  // começa mostrando os meses mais recentes
+  useEffect(() => { if (rolar && ref.current) ref.current.scrollLeft = ref.current.scrollWidth; }, [n, rolar]);
+  return (
+    <div ref={ref} style={{ overflowX: rolar ? "auto" : "hidden" }}>
+      <svg viewBox={`0 0 ${W} ${H}`} width={W} height={H} style={{ fontFamily: SANS, display: "block" }} role="img" aria-label="Entrou e saiu por mês">
+        {grade.map((v) => (
+          <g key={v}>
+            <line x1={pad.l} x2={W - pad.r} y1={y(v)} y2={y(v)} stroke="var(--line)" />
+            <text x={pad.l - 6} y={y(v) + 3} textAnchor="end" fontSize="9" fill="var(--muted)">{fmtK(v)}</text>
+          </g>
+        ))}
+        {historico.map((m, i) => {
+          const cx = pad.l + gw * i + gw / 2, parcial = m.mes === mesCorrente;
+          const sobra = m.saldo;
+          return (
+            <g key={m.mes} onClick={() => aoEscolherMes(m.mes)} style={{ cursor: "pointer" }} opacity={parcial ? 0.6 : 1}>
+              <title>{`${nomeMes(m.mes)}: entrou ${fmt(m.receita)}, saiu ${fmt(m.despesa)}`}</title>
+              <rect x={pad.l + gw * i} y={pad.t} width={gw} height={ih + pad.b} fill="transparent" />
+              <rect x={cx - bw - 1} y={y(m.receita)} width={bw} height={Math.max(y(0) - y(m.receita), 0)} rx="3" fill="var(--entrou)" />
+              <rect x={cx + 1} y={y(m.despesa)} width={bw} height={Math.max(y(0) - y(m.despesa), 0)} rx="3" fill="var(--saiu)" />
+              <text x={cx} y={H - 24} textAnchor="middle" fontSize="10.5" fontWeight="600" fill="var(--ink)" style={{ textTransform: "capitalize" }}>{nomeMes(m.mes).split("/")[0]}{parcial ? "*" : ""}</text>
+              <text x={cx} y={H - 9} textAnchor="middle" fontSize="9.5" fontWeight="700" fill={sobra >= 0 ? "var(--green)" : "var(--red)"}>{sobra >= 0 ? "+" : "−"}{fmtK(Math.abs(sobra))}</text>
+            </g>
+          );
+        })}
+      </svg>
+      {rolar && <div style={{ position: "sticky", left: 0, fontSize: 11, color: "var(--muted)" }}>← deslize para ver os meses anteriores</div>}
+    </div>
+  );
+}
+
+function CartaoMesAMes({ historico, mesCorrente, aoEscolherMes }) {
+  const fechados = historico.filter((m) => m.mes !== mesCorrente);
+  const base = fechados.length ? fechados : historico;
+  const mediaEntrou = base.reduce((s, m) => s + m.receita, 0) / (base.length || 1);
+  const mediaSaiu = base.reduce((s, m) => s + m.despesa, 0) / (base.length || 1);
+  const legenda = (cor, texto) => (
+    <span style={{ display: "inline-flex", alignItems: "center", gap: 5 }}>
+      <span style={{ width: 10, height: 10, borderRadius: 3, background: cor }} />{texto}
+    </span>
+  );
+  return (
+    <div className="d-historico" style={CARTAO}>
+      <div style={{ display: "flex", justifyContent: "space-between", flexWrap: "wrap", gap: 8, marginBottom: 6 }}>
+        <span style={ROTULO}>Entrou x saiu por mês</span>
+        <span style={{ display: "flex", gap: 12, fontSize: 11.5, color: "var(--muted)" }}>
+          {legenda("var(--entrou)", "entrou")}{legenda("var(--saiu)", "saiu")}
+        </span>
+      </div>
+      <GraficoMesAMes historico={historico} mesCorrente={mesCorrente} aoEscolherMes={aoEscolherMes} />
+      <div style={{ display: "flex", flexWrap: "wrap", gap: "4px 16px", fontSize: 11.5, color: "var(--muted)", marginTop: 6 }}>
+        <span>média por mês: entrou <b style={{ color: "var(--ink)" }}>{fmt(mediaEntrou)}</b>, saiu <b style={{ color: "var(--ink)" }}>{fmt(mediaSaiu)}</b></span>
+        <span>embaixo de cada mês: quanto sobrou</span>
+        {historico.some((m) => m.mes === mesCorrente) && <span>* mês ainda em andamento</span>}
+      </div>
+    </div>
+  );
+}
+
+// Cartão do topo: saldo real nas contas (o mesmo de "Saldo disponível em
+// conta") + entrou/saiu do período escolhido. Sem conta cadastrada, mostra
+// o que sobrou no período e um atalho pra informar o saldo.
+function HeroSaldo({ usuarioId, dadosView, rotuloPeriodo, versaoSaldo, aoGerenciar, gerenciando }) {
+  const [saldo, setSaldo] = useState(null);
+  useEffect(() => {
+    fetch(`${API_URL}/api/saldo-disponivel/${usuarioId}`)
+      .then((r) => r.json())
+      .then(setSaldo)
+      .catch(() => setSaldo({ contas: [], total: 0 }));
+  }, [usuarioId, versaoSaldo]);
+  const temContas = saldo && saldo.contas.length > 0;
+  const entrou = dadosView ? dadosView.receita_total : 0, saiu = dadosView ? dadosView.despesa_total : 0;
+  const caixa = { flex: 1, background: "rgba(0,0,0,0.14)", borderRadius: 12, padding: "8px 11px", minWidth: 0 };
+  return (
+    <div style={{ background: "var(--hero)", color: "#fff", borderRadius: "var(--radius)", padding: 18, position: "relative", overflow: "hidden" }}>
+      <div style={{ position: "absolute", right: -40, top: -40, width: 150, height: 150, borderRadius: "50%", background: "rgba(255,255,255,0.10)" }} />
+      <div style={{ position: "relative", display: "flex", justifyContent: "space-between", gap: 8, alignItems: "flex-start" }}>
+        <div style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: 0.6, color: "rgba(255,255,255,0.82)" }}>
+          {temContas || !dadosView ? "Saldo nas suas contas" : `Sobrou ${rotuloPeriodo}`}
+        </div>
+        <button onClick={aoGerenciar} style={{ fontSize: 11, fontWeight: 700, background: "rgba(0,0,0,0.18)", color: "#fff", border: "none", padding: "5px 10px", borderRadius: 999, cursor: "pointer", whiteSpace: "nowrap" }}>
+          {gerenciando ? "fechar" : temContas ? "editar contas" : "+ saldo das contas"}
+        </button>
+      </div>
+      <div style={{ position: "relative", fontSize: 30, fontWeight: 800, letterSpacing: -0.6, margin: "4px 0 2px" }}>
+        {saldo === null ? "…" : temContas || !dadosView ? fmt2(saldo.total) : fmt2(dadosView.saldo)}
+      </div>
+      {temContas && (
+        <div style={{ position: "relative", display: "flex", flexWrap: "wrap", gap: 6, marginTop: 8 }}>
+          {saldo.contas.map((c) => (
+            <span key={c.banco} style={{ background: "rgba(0,0,0,0.16)", borderRadius: 999, padding: "4px 10px", fontSize: 11, fontWeight: 600 }}>{c.nome_exibicao} {fmt(c.saldo)}</span>
+          ))}
+        </div>
+      )}
+      <div style={{ position: "relative", display: "flex", gap: 10, marginTop: 14 }}>
+        <div style={caixa}><div style={{ fontSize: 12, opacity: 0.85 }}>Entrou</div><b style={{ fontSize: 16 }}>{fmt(entrou)}</b></div>
+        <div style={caixa}><div style={{ fontSize: 12, opacity: 0.85 }}>Saiu</div><b style={{ fontSize: 16 }}>{fmt(saiu)}</b></div>
+      </div>
+    </div>
+  );
+}
+
+// Botão Claro/Noturno — grava a escolha no aparelho (localStorage) e aplica
+// no <html data-theme>, que é o que o CSS lê. Sem escolha salva, segue o
+// tema do sistema (prefers-color-scheme).
+function lerTemaSalvo() {
+  try { const t = localStorage.getItem("assessor_tema"); return t === "light" || t === "dark" ? t : null; } catch (e) { return null; }
+}
+function temaDoSistema() {
+  return window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+}
+function BotaoTema() {
+  const [tema, setTema] = useState(() => lerTemaSalvo() || temaDoSistema());
+  function escolher(t) {
+    setTema(t);
+    document.documentElement.setAttribute("data-theme", t);
+    try { localStorage.setItem("assessor_tema", t); } catch (e) { /* aba anônima: vale só nesta visita */ }
+  }
+  const opcao = (t, rotulo) => (
+    <button onClick={() => escolher(t)} aria-pressed={tema === t}
+      style={{ border: "none", borderRadius: 999, padding: "6px 12px", fontSize: 12, fontWeight: 700, cursor: "pointer", background: tema === t ? "var(--primary)" : "transparent", color: tema === t ? "#fff" : "var(--muted)" }}>
+      {rotulo}
+    </button>
+  );
+  return (
+    <div style={{ display: "flex", background: "var(--paper)", border: "1px solid var(--line)", borderRadius: 999, padding: 3 }}>
+      {opcao("light", "Claro")}{opcao("dark", "Noturno")}
+    </div>
+  );
+}
+
+// Saldo disponível de verdade em cada conta/banco — bem diferente do KPI
+// "Sobrou no mês" (que é só entrou-saiu do período, não o quanto tem na
+// conta). Não depende do mês escolhido no dashboard — é sempre "agora".
+// Entra sozinho quando um extrato OFX traz o saldo real, e dá pra
+// corrigir/cadastrar na mão a qualquer momento (ex: poupança que não
+// sobe extrato, ou só pra ajustar um valor desatualizado).
+function WidgetSaldoDisponivel({ usuarioId, aoMudar }) {
+  const [dados, setDados] = useState(null);
+  const [editandoBanco, setEditandoBanco] = useState(null); // null | banco (string) | "__novo__"
+  const [nomeForm, setNomeForm] = useState("");
+  const [valorForm, setValorForm] = useState("");
+  const [salvando, setSalvando] = useState(false);
+  const [confirmandoExclusao, setConfirmandoExclusao] = useState(null);
+
+  function carregar() {
+    fetch(`${API_URL}/api/saldo-disponivel/${usuarioId}`)
+      .then((r) => r.json())
+      .then(setDados)
+      .catch(() => setDados({ contas: [], total: 0 }));
+  }
+  useEffect(carregar, [usuarioId]);
+
+  function abrirEdicao(conta) {
+    setEditandoBanco(conta.banco);
+    setNomeForm(conta.nome_exibicao);
+    setValorForm(String(conta.saldo));
+    setConfirmandoExclusao(null);
+  }
+  function abrirNova() {
+    setEditandoBanco("__novo__");
+    setNomeForm("");
+    setValorForm("");
+    setConfirmandoExclusao(null);
+  }
+  function cancelar() {
+    setEditandoBanco(null);
+    setNomeForm("");
+    setValorForm("");
+  }
+
+  async function salvar() {
+    if (!nomeForm.trim() || valorForm === "") return;
+    setSalvando(true);
+    try {
+      const corpo = { nome: nomeForm, valor: parseFloat(valorForm) };
+      if (editandoBanco && editandoBanco !== "__novo__") corpo.banco = editandoBanco;
+      const r = await fetch(`${API_URL}/api/saldo-disponivel/${usuarioId}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(corpo),
+      });
+      const resp = await r.json();
+      if (resp.erro) { alert(resp.erro); return; }
+      cancelar();
+      carregar();
+      aoMudar && aoMudar();
+    } catch (e) {
+      alert("Não consegui salvar — confere sua internet e tenta de novo.");
+    } finally {
+      setSalvando(false);
+    }
+  }
+
+  async function excluir(banco) {
+    setSalvando(true);
+    try {
+      const r = await fetch(`${API_URL}/api/saldo-disponivel/${usuarioId}/${banco}`, { method: "DELETE" });
+      const resp = await r.json();
+      if (resp.erro) { alert(resp.erro); return; }
+      setConfirmandoExclusao(null);
+      carregar();
+      aoMudar && aoMudar();
+    } catch (e) {
+      alert("Não consegui excluir — confere sua internet e tenta de novo.");
+    } finally {
+      setSalvando(false);
+    }
+  }
+
+  if (!dados) return null;
+  const positivo = dados.total >= 0;
+
+  return (
+    <div style={{ background: "var(--paper)", border: "1px solid var(--line)", borderRadius: "var(--radius)", boxShadow: "var(--shadow)", padding: "16px 20px", fontFamily: SANS }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 10 }}>
+        <div>
+          <div style={{ fontSize: 11, fontWeight: 600, color: "var(--muted)", textTransform: "uppercase", letterSpacing: 0.6 }}>Saldo disponível em conta</div>
+          <div style={{ fontSize: 24, fontWeight: 800, color: positivo ? "var(--ink)" : "var(--red)", marginTop: 4, letterSpacing: -0.3 }}>{fmt2(dados.total)}</div>
+        </div>
+        <button onClick={abrirNova} style={{ fontSize: 12, fontWeight: 600, background: "var(--bg)", color: "var(--primary)", border: "1px solid var(--line)", padding: "6px 10px", cursor: "pointer", whiteSpace: "nowrap" }}>
+          + conta
+        </button>
+      </div>
+
+      {dados.contas.length === 0 && editandoBanco !== "__novo__" && (
+        <div style={{ fontSize: 12.5, color: "var(--muted)" }}>nenhuma conta cadastrada ainda — soma de um extrato OFX entra sozinha, ou clique em "+ conta" pra digitar na mão</div>
+      )}
+
+      {dados.contas.map((c) => (
+        <div key={c.banco}>
+          {editandoBanco === c.banco ? (
+            <div style={{ display: "flex", gap: 6, flexWrap: "wrap", alignItems: "center", padding: "8px 0" }}>
+              <input value={nomeForm} onChange={(e) => setNomeForm(e.target.value)} placeholder="nome da conta"
+                style={{ flex: 1, minWidth: 120, fontSize: 13, padding: "7px 9px", border: "1px solid var(--line)", background: "var(--bg)", color: "var(--ink)" }} />
+              <input type="number" step="0.01" value={valorForm} onChange={(e) => setValorForm(e.target.value)} placeholder="saldo"
+                style={{ width: 110, fontSize: 13, padding: "7px 9px", border: "1px solid var(--line)", background: "var(--bg)", color: "var(--ink)" }} />
+              <button onClick={salvar} disabled={salvando} style={{ fontSize: 12, background: "var(--primary)", color: "#fff", border: "none", padding: "7px 10px", cursor: "pointer" }}>salvar</button>
+              <button onClick={cancelar} style={{ fontSize: 12, background: "var(--bg)", color: "var(--muted)", border: "1px solid var(--line)", padding: "7px 10px", cursor: "pointer" }}>cancelar</button>
+            </div>
+          ) : confirmandoExclusao === c.banco ? (
+            <div style={{ display: "flex", gap: 6, flexWrap: "wrap", alignItems: "center", padding: "8px 0" }}>
+              <div style={{ flex: 1, minWidth: 140, fontSize: 12, color: "var(--ink)" }}>remover "{c.nome_exibicao}" da lista?</div>
+              <button onClick={() => excluir(c.banco)} disabled={salvando} style={{ fontSize: 11.5, background: "var(--red)", color: "#fff", border: "none", padding: "6px 10px", cursor: "pointer" }}>remover</button>
+              <button onClick={() => setConfirmandoExclusao(null)} style={{ fontSize: 11.5, background: "var(--bg)", color: "var(--muted)", border: "1px solid var(--line)", padding: "6px 10px", cursor: "pointer" }}>cancelar</button>
+            </div>
+          ) : (
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 10, padding: "8px 0", borderTop: "1px solid var(--line)" }}>
+              <div>
+                <div style={{ fontSize: 13, fontWeight: 600 }}>{c.nome_exibicao}</div>
+                <div style={{ fontSize: 11, color: "var(--muted)" }}>
+                  {c.origem === "ofx" ? "atualizado automático" : "digitado na mão"} · {c.atualizado_em.split("-").reverse().join("/")}
+                </div>
+              </div>
+              <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                <div style={{ fontSize: 14, fontWeight: 700, color: c.saldo >= 0 ? "var(--ink)" : "var(--red)", whiteSpace: "nowrap" }}>{fmt2(c.saldo)}</div>
+                <button onClick={() => abrirEdicao(c)} title="editar" style={{ background: "none", border: "none", cursor: "pointer", color: "var(--muted)", padding: 3 }}><Icone nome="editar" tamanho={16} /></button>
+                <button onClick={() => setConfirmandoExclusao(c.banco)} title="remover" style={{ background: "none", border: "none", cursor: "pointer", color: "var(--muted)", padding: 3 }}><Icone nome="lixeira" tamanho={16} /></button>
+              </div>
+            </div>
+          )}
+        </div>
+      ))}
+
+      {editandoBanco === "__novo__" && (
+        <div style={{ display: "flex", gap: 6, flexWrap: "wrap", alignItems: "center", padding: "8px 0", borderTop: dados.contas.length > 0 ? "1px solid var(--line)" : "none" }}>
+          <input value={nomeForm} onChange={(e) => setNomeForm(e.target.value)} placeholder="nome (ex: Poupança Caixa)" autoFocus
+            style={{ flex: 1, minWidth: 120, fontSize: 13, padding: "7px 9px", border: "1px solid var(--line)", background: "var(--bg)", color: "var(--ink)" }} />
+          <input type="number" step="0.01" value={valorForm} onChange={(e) => setValorForm(e.target.value)} placeholder="saldo"
+            style={{ width: 110, fontSize: 13, padding: "7px 9px", border: "1px solid var(--line)", background: "var(--bg)", color: "var(--ink)" }} />
+          <button onClick={salvar} disabled={salvando || !nomeForm.trim() || valorForm === ""} style={{ fontSize: 12, background: "var(--primary)", color: "#fff", border: "none", padding: "7px 10px", cursor: "pointer" }}>salvar</button>
+          <button onClick={cancelar} style={{ fontSize: 12, background: "var(--bg)", color: "var(--muted)", border: "1px solid var(--line)", padding: "7px 10px", cursor: "pointer" }}>cancelar</button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// Gráfico de barras horizontal em SVG puro (sem lib externa — mais
+// simples e confiável numa página publicada sozinha). Cada barra é
+// clicável e abre o detalhe da categoria.
+function GraficoCategorias({ dados, cor, onClicarCategoria }) {
+  const ordenadas = [...dados].sort((a, b) => b.valor - a.valor);
+  const max = Math.max(...ordenadas.map((d) => d.valor), 1);
+  const altLinha = 32;
+  const altura = ordenadas.length * altLinha + 10;
+  return (
+    <svg viewBox={`0 0 600 ${altura}`} width="100%" style={{ overflow: "visible", fontFamily: SANS }}>
+      {ordenadas.map((c, i) => {
+        const y = i * altLinha;
+        const larguraBarra = Math.max((c.valor / max) * 380, 4);
+        return (
+          <g key={c.nome} onClick={() => onClicarCategoria && onClicarCategoria(c.nome)} style={{ cursor: onClicarCategoria ? "pointer" : "default" }}>
+            <rect x="0" y={y} width="600" height={altLinha} fill="transparent" />
+            <text x="0" y={y + 16} fontSize="12.5" fontWeight="500" fill="var(--ink)" dominantBaseline="middle">{c.nome}</text>
+            <rect x="200" y={y + 6} width="380" height="16" rx="8" fill="var(--line)" opacity="0.5" />
+            <rect x="200" y={y + 6} width={larguraBarra} height="16" rx="8" fill={cor} />
+            <text x={205 + larguraBarra} y={y + 16} fontSize="11" fontWeight="500" fill="var(--muted)" dominantBaseline="middle">{fmt2(c.valor)}</text>
+          </g>
+        );
+      })}
+    </svg>
+  );
+}
+
+function PainelDetalheCategoria({ usuarioId, categoria, mes, tipo, categorias, aoFechar, aoCorrigir }) {
+  const [itens, setItens] = useState(null);
+  const [editandoId, setEditandoId] = useState(null);
+  const [novaCategoria, setNovaCategoria] = useState("");
+  const [novaSubcategoria, setNovaSubcategoria] = useState("");
+  const [subgrupos, setSubgrupos] = useState([]);
+  const [criandoSubgrupo, setCriandoSubgrupo] = useState(false);
+  const [nomeNovoSubgrupo, setNomeNovoSubgrupo] = useState("");
+  const [salvando, setSalvando] = useState(false);
+  const [confirmandoExclusaoId, setConfirmandoExclusaoId] = useState(null);
+  const [excluindo, setExcluindo] = useState(false);
+  const [subgrupoAberto, setSubgrupoAberto] = useState(null); // nome do subgrupo expandido no momento, ou null
+
+  // "Outros/Diversos" existe nas duas listas (despesa e receita), então não dá
+  // pra adivinhar só pelo nome da categoria — usa o tipo explícito vindo do
+  // gráfico que foi clicado (tipo="C" receita, tipo="D" despesa).
+  const tipoLista = tipo === "C" ? "receita" : "despesa";
+  const listaCategorias = (categorias && categorias[tipoLista]) || (tipoLista === "receita" ? CATEGORIAS_RECEITA_PADRAO : CATEGORIAS_DESPESA_PADRAO);
+
+  function carregarItens() {
+    const params = new URLSearchParams({ categoria });
+    if (mes) params.set("mes", mes);
+    if (tipo) params.set("tipo", tipo);
+    fetch(`${API_URL}/api/detalhe/${usuarioId}?${params.toString()}`)
+      .then((r) => r.json())
+      .then(setItens)
+      .catch(() => setItens([]));
+  }
+
+  function carregarSubgrupos(paraCategoria) {
+    fetch(`${API_URL}/api/subcategorias/${usuarioId}?categoria=${encodeURIComponent(paraCategoria)}`)
+      .then((r) => r.json())
+      .then((lista) => setSubgrupos(Array.isArray(lista) ? lista : []))
+      .catch(() => setSubgrupos([]));
+  }
+
+  useEffect(carregarItens, [categoria, mes, tipo]);
+  useEffect(() => { carregarSubgrupos(categoria); setSubgrupoAberto(null); }, [categoria, mes, tipo]);
+  // enquanto edita, se a categoria escolhida mudar, busca os subgrupos
+  // dessa categoria nova em vez dos da categoria original do modal
+  useEffect(() => {
+    if (editandoId && novaCategoria) carregarSubgrupos(novaCategoria);
+  }, [editandoId, novaCategoria]);
+
+  // agrupa os itens por subgrupo pra visualização — sem subgrupo fica
+  // reunido no final, pra não sumir com o resto que ainda não foi detalhado
+  const grupos = useMemo(() => {
+    if (!itens) return [];
+    const mapa = {};
+    itens.forEach((it) => {
+      const chave = it.subcategoria || "";
+      (mapa[chave] = mapa[chave] || []).push(it);
+    });
+    const chaves = Object.keys(mapa).filter((k) => k !== "").sort();
+    if (mapa[""]) chaves.push("");
+    return chaves.map((k) => ({ nome: k || "Sem subgrupo", itens: mapa[k] }));
+  }, [itens]);
+
+  async function salvarCorrecao(lancamentoId) {
+    if (!novaCategoria) return;
+    setSalvando(true);
+    try {
+      const r = await fetch(`${API_URL}/api/recategorizar/${usuarioId}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ lancamento_id: lancamentoId, categoria: novaCategoria, subcategoria: novaSubcategoria }),
+      });
+      const dados = await r.json();
+      if (dados.ok) {
+        setEditandoId(null);
+        carregarItens();
+        aoCorrigir(); // atualiza os gráficos por trás, já que a categoria mudou
+      }
+    } catch (e) {
+      alert("Não consegui salvar — confere sua internet e tenta de novo.");
+    } finally {
+      setSalvando(false);
+    }
+  }
+
+  async function confirmarNovoSubgrupo() {
+    if (!nomeNovoSubgrupo.trim()) return;
+    setSalvando(true);
+    try {
+      const r = await fetch(`${API_URL}/api/subcategorias/${usuarioId}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ categoria: novaCategoria || categoria, nome: nomeNovoSubgrupo }),
+      });
+      const dados = await r.json();
+      if (dados.erro) {
+        alert(dados.erro);
+        return;
+      }
+      setSubgrupos((lista) => (lista.includes(nomeNovoSubgrupo) ? lista : [...lista, nomeNovoSubgrupo]));
+      setNovaSubcategoria(nomeNovoSubgrupo);
+      setCriandoSubgrupo(false);
+      setNomeNovoSubgrupo("");
+    } catch (e) {
+      alert("Não consegui criar o subgrupo — confere sua internet e tenta de novo.");
+    } finally {
+      setSalvando(false);
+    }
+  }
+
+  async function excluirItem(lancamentoId) {
+    setExcluindo(true);
+    try {
+      const r = await fetch(`${API_URL}/api/excluir-lancamento/${usuarioId}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ lancamento_id: lancamentoId }),
+      });
+      const dados = await r.json();
+      if (dados.ok) {
+        setConfirmandoExclusaoId(null);
+        carregarItens();
+        aoCorrigir(); // atualiza os gráficos por trás, já que um lançamento sumiu
+      } else {
+        alert(dados.erro || "Não consegui excluir.");
+      }
+    } catch (e) {
+      alert("Não consegui excluir — confere sua internet e tenta de novo.");
+    } finally {
+      setExcluindo(false);
+    }
+  }
+
+  return (
+    <div onClick={aoFechar} style={{ position: "fixed", inset: 0, background: "rgba(15,22,38,0.5)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 50, padding: 20 }}>
+      <div onClick={(e) => e.stopPropagation()} style={{ background: "var(--paper)", borderRadius: "var(--radius)", boxShadow: "var(--shadow)", maxWidth: 480, width: "100%", maxHeight: "80vh", overflow: "auto", padding: 24, fontFamily: SANS }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 4 }}>
+          <div style={{ fontSize: 19, fontWeight: 800, letterSpacing: -0.3 }}>{categoria}</div>
+          <button onClick={aoFechar} style={{ background: "none", border: "none", cursor: "pointer", fontSize: 18, color: "var(--muted)", lineHeight: 1 }}>✕</button>
+        </div>
+        <div style={{ fontSize: 12, color: "var(--muted)", marginBottom: 16 }}>o que forma essa categoria{mes ? " neste mês" : " no período todo"} — categorizou errado? clique no lápis</div>
+        {itens === null && <div style={{ fontSize: 13, color: "var(--muted)" }}>carregando...</div>}
+        {itens && itens.length === 0 && <div style={{ fontSize: 13, color: "var(--muted)" }}>nada encontrado</div>}
+        {grupos.map((grupo) => {
+          const ehSemSubgrupo = grupo.nome === "Sem subgrupo";
+          const total = grupo.itens.reduce((s, it) => s + it.valor, 0);
+          const aberto = ehSemSubgrupo || subgrupoAberto === grupo.nome;
+          return (
+          <div key={grupo.nome} style={{ marginBottom: 12 }}>
+            {grupos.length > 1 && ehSemSubgrupo && (
+              <div style={{ fontSize: 11, fontWeight: 700, color: "var(--muted)", textTransform: "uppercase", letterSpacing: 0.4, margin: "14px 0 2px" }}>
+                {grupo.nome}
+              </div>
+            )}
+            {!ehSemSubgrupo && (
+              <div
+                onClick={() => setSubgrupoAberto(aberto ? null : grupo.nome)}
+                style={{
+                  display: "flex", justifyContent: "space-between", alignItems: "center",
+                  padding: "10px 12px", marginBottom: aberto ? 2 : 6, borderRadius: "var(--radius-sm)",
+                  background: aberto ? "var(--primary-soft)" : "var(--bg)", cursor: "pointer",
+                }}
+              >
+                <div style={{ fontSize: 13, fontWeight: 700, display: "flex", alignItems: "center", gap: 6 }}>
+                  <span style={{ display: "inline-block", width: 10, color: "var(--primary)", fontSize: 11 }}>{aberto ? "▾" : "▸"}</span>
+                  {grupo.nome}
+                  <span style={{ fontWeight: 500, color: "var(--muted)", fontSize: 12 }}>({grupo.itens.length})</span>
+                </div>
+                <div style={{ fontSize: 13, fontWeight: 700 }}>{fmt2(total)}</div>
+              </div>
+            )}
+            {aberto && grupo.itens.map((it) => (
+              <div key={it.id} style={{ padding: "8px 4px", borderBottom: "1px solid var(--line)", fontSize: 13 }}>
+                {editandoId === it.id ? (
+                  <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                    <div style={{ display: "flex", gap: 6, flexWrap: "wrap", alignItems: "center" }}>
+                      <select
+                        value={novaCategoria}
+                        onChange={(e) => setNovaCategoria(e.target.value)}
+                        autoFocus
+                        style={{ flex: 1, minWidth: 160, fontSize: 12, padding: "6px 8px", border: "1px solid var(--line)", background: "var(--bg)", color: "var(--ink)" }}
+                      >
+                        {listaCategorias.map((c) => <option key={c} value={c}>{c}</option>)}
+                      </select>
+                      {criandoSubgrupo ? (
+                        <>
+                          <input
+                            value={nomeNovoSubgrupo}
+                            onChange={(e) => setNomeNovoSubgrupo(e.target.value)}
+                            onKeyDown={(e) => e.key === "Enter" && confirmarNovoSubgrupo()}
+                            placeholder="nome do subgrupo..."
+                            autoFocus
+                            style={{ flex: 1, minWidth: 140, fontSize: 12, padding: "6px 8px", border: "1px solid var(--line)", background: "var(--bg)", color: "var(--ink)" }}
+                          />
+                          <button onClick={confirmarNovoSubgrupo} disabled={salvando || !nomeNovoSubgrupo.trim()} style={{ fontSize: 12, background: "var(--green)", color: "#fff", border: "none", padding: "6px 10px", cursor: "pointer" }}>
+                            criar
+                          </button>
+                          <button onClick={() => { setCriandoSubgrupo(false); setNomeNovoSubgrupo(""); }} style={{ fontSize: 12, background: "var(--bg)", color: "var(--muted)", border: "1px solid var(--line)", padding: "6px 10px", cursor: "pointer" }}>
+                            cancelar
+                          </button>
+                        </>
+                      ) : (
+                        <select
+                          value={novaSubcategoria}
+                          onChange={(e) => (e.target.value === "__novo__" ? setCriandoSubgrupo(true) : setNovaSubcategoria(e.target.value))}
+                          style={{ flex: 1, minWidth: 140, fontSize: 12, padding: "6px 8px", border: "1px solid var(--line)", background: "var(--bg)", color: "var(--ink)" }}
+                        >
+                          <option value="">sem subgrupo</option>
+                          {subgrupos.map((s) => <option key={s} value={s}>{s}</option>)}
+                          <option value="__novo__">+ criar subgrupo novo...</option>
+                        </select>
+                      )}
+                    </div>
+                    <div style={{ display: "flex", gap: 6 }}>
+                      <button onClick={() => salvarCorrecao(it.id)} disabled={salvando || !novaCategoria} style={{ fontSize: 12, background: "var(--green)", color: "#fff", border: "none", padding: "6px 12px", cursor: "pointer" }}>
+                        {salvando ? "..." : "salvar"}
+                      </button>
+                      <button onClick={() => setEditandoId(null)} style={{ fontSize: 12, background: "var(--bg)", color: "var(--muted)", border: "1px solid var(--line)", padding: "6px 12px", cursor: "pointer" }}>
+                        cancelar
+                      </button>
+                    </div>
+                  </div>
+                ) : confirmandoExclusaoId === it.id ? (
+                  <div style={{ display: "flex", gap: 6, flexWrap: "wrap", alignItems: "center" }}>
+                    <div style={{ flex: 1, minWidth: 160, fontSize: 12, color: "var(--ink)" }}>
+                      excluir "{it.descricao}" ({fmt2(it.valor)})? não tem como desfazer.
+                    </div>
+                    <button onClick={() => excluirItem(it.id)} disabled={excluindo} style={{ fontSize: 12, background: "var(--red)", color: "#fff", border: "none", padding: "6px 12px", cursor: "pointer" }}>
+                      {excluindo ? "..." : "excluir"}
+                    </button>
+                    <button onClick={() => setConfirmandoExclusaoId(null)} style={{ fontSize: 12, background: "var(--bg)", color: "var(--muted)", border: "1px solid var(--line)", padding: "6px 12px", cursor: "pointer" }}>
+                      cancelar
+                    </button>
+                  </div>
+                ) : (
+                  <div style={{ display: "flex", justifyContent: "space-between", gap: 12 }}>
+                    <div style={{ flex: 1 }}>
+                      <div>{it.descricao}</div>
+                      <div style={{ fontSize: 11, color: "var(--muted)" }}>{it.data}</div>
+                    </div>
+                    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                      <div style={{ fontWeight: 600, whiteSpace: "nowrap" }}>{fmt2(it.valor)}</div>
+                      <button
+                        onClick={() => {
+                          setEditandoId(it.id);
+                          setNovaCategoria(categoria);
+                          setNovaSubcategoria(it.subcategoria || "");
+                          setCriandoSubgrupo(false);
+                          setNomeNovoSubgrupo("");
+                        }}
+                        title="corrigir categoria/subgrupo"
+                        style={{ background: "none", border: "none", cursor: "pointer", fontSize: 14, color: "var(--muted)", padding: 2 }}
+                      >
+                        <Icone nome="editar" tamanho={16} />
+                      </button>
+                      <button
+                        onClick={() => setConfirmandoExclusaoId(it.id)}
+                        title="excluir lançamento"
+                        style={{ background: "none", border: "none", cursor: "pointer", fontSize: 14, color: "var(--muted)", padding: 2 }}
+                      >
+                        <Icone nome="lixeira" tamanho={16} />
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+function CartaoPergunta({ pergunta, usuarioId, categorias, aoResponder, aoCriarCategoria }) {
+  const ehCategoria = pergunta.tipo !== "conciliacao_emprestimo";
+  const tipoLista = pergunta.tipo_lancamento === "C" ? "receita" : "despesa";
+  const listaCategorias = (categorias && categorias[tipoLista]) || (tipoLista === "receita" ? CATEGORIAS_RECEITA_PADRAO : CATEGORIAS_DESPESA_PADRAO);
+  const [resposta, setResposta] = useState(ehCategoria ? "" : "");
+  const [enviando, setEnviando] = useState(false);
+  const [criandoNova, setCriandoNova] = useState(false);
+  const [nomeNovaCategoria, setNomeNovaCategoria] = useState("");
+
+  async function enviar(valorForcar) {
+    const valor = valorForcar !== undefined ? valorForcar : resposta;
+    if (!valor.trim()) return;
+    setEnviando(true);
+    try {
+      const r = await fetch(`${API_URL}/api/responder/${usuarioId}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ pergunta_id: pergunta.id, resposta: valor }),
+      });
+      if (r.ok) aoResponder(pergunta.id, valor);
+    } catch (e) {
+      alert("Não consegui enviar agora — confere sua internet e tenta de novo.");
+    } finally {
+      setEnviando(false);
+    }
+  }
+
+  async function confirmarNovaCategoria() {
+    if (!nomeNovaCategoria.trim()) return;
+    setEnviando(true);
+    try {
+      const r = await fetch(`${API_URL}/api/categorias/${usuarioId}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ nome: nomeNovaCategoria, tipo: tipoLista }),
+      });
+      const dados = await r.json();
+      if (dados.erro) {
+        alert(dados.erro);
+        setEnviando(false);
+        return;
+      }
+      await aoCriarCategoria();
+      setCriandoNova(false);
+      enviar(nomeNovaCategoria);
+    } catch (e) {
+      alert("Não consegui criar a categoria — confere sua internet e tenta de novo.");
+      setEnviando(false);
+    }
+  }
+
+  function aoMudarSelect(valor) {
+    if (valor === "__nova__") { setCriandoNova(true); setResposta(""); }
+    else { setCriandoNova(false); setResposta(valor); }
+  }
+
+  return (
+    <div style={{ fontFamily: SANS, padding: "16px 18px", borderRadius: "var(--radius)", borderLeft: "4px solid var(--primary)", marginBottom: 10, background: "var(--paper)", boxShadow: "var(--shadow)" }}>
+      <div style={{ fontSize: 14, marginBottom: 4 }}>{pergunta.texto}</div>
+      <div style={{ fontSize: 12, color: "var(--muted)", marginBottom: 10 }}>
+        {ehCategoria ? `escolha a categoria de ${tipoLista} que melhor se encaixa` : "conciliação de empréstimo"}
+      </div>
+      {ehCategoria ? (
+        criandoNova ? (
+          <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+            <input
+              value={nomeNovaCategoria}
+              onChange={(e) => setNomeNovaCategoria(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && confirmarNovaCategoria()}
+              placeholder="nome da categoria nova..."
+              autoFocus
+              style={{ flex: 1, minWidth: 200, fontSize: 13, padding: "8px 10px", border: "1px solid var(--line)", background: "var(--bg)", color: "var(--ink)" }}
+            />
+            <button onClick={confirmarNovaCategoria} disabled={enviando || !nomeNovaCategoria.trim()} style={{ fontSize: 13, background: "var(--green)", color: "#fff", border: "none", padding: "8px 16px", cursor: "pointer" }}>
+              {enviando ? "..." : "criar e usar"}
+            </button>
+            <button onClick={() => setCriandoNova(false)} style={{ fontSize: 13, background: "var(--bg)", color: "var(--muted)", border: "1px solid var(--line)", padding: "8px 16px", cursor: "pointer" }}>
+              cancelar
+            </button>
+          </div>
+        ) : (
+          <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+            <select
+              value={resposta}
+              onChange={(e) => aoMudarSelect(e.target.value)}
+              style={{ flex: 1, minWidth: 200, fontSize: 13, padding: "8px 10px", border: "1px solid var(--line)", background: "var(--bg)", color: "var(--ink)" }}
+            >
+              <option value="">selecione...</option>
+              {listaCategorias.map((c) => <option key={c} value={c}>{c}</option>)}
+              <option value="__nova__">+ Criar categoria nova...</option>
+            </select>
+            <button onClick={() => enviar()} disabled={enviando || !resposta} style={{ fontSize: 13, background: "var(--primary)", color: "#fff", border: "none", padding: "8px 16px", cursor: "pointer" }}>
+              {enviando ? "..." : "enviar"}
+            </button>
+          </div>
+        )
+      ) : (
+        <div style={{ display: "flex", gap: 8 }}>
+          <button onClick={() => enviar("sim")} disabled={enviando} style={{ fontSize: 13, background: "var(--green)", color: "#fff", border: "none", padding: "8px 16px", cursor: "pointer" }}>sim</button>
+          <button onClick={() => enviar("não")} disabled={enviando} style={{ fontSize: 13, background: "var(--bg)", color: "var(--muted)", border: "1px solid var(--line)", padding: "8px 16px", cursor: "pointer" }}>não</button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function AreaUpload({ usuarioId, aoProcessar }) {
+  const [processando, setProcessando] = useState(false);
+  const [ultimoResultado, setUltimoResultado] = useState(null);
+
+  async function selecionarArquivo(e) {
+    const arquivo = e.target.files[0];
+    if (!arquivo) return;
+    setProcessando(true);
+    setUltimoResultado(null);
+    const form = new FormData();
+    form.append("arquivo", arquivo);
+    try {
+      let r;
+      try {
+        r = await fetch(`${API_URL}/api/upload/${usuarioId}`, { method: "POST", body: form });
+      } catch (errRede) {
+        // só aqui é problema de conexão de verdade
+        setUltimoResultado({ erro: "Não consegui enviar — confere sua internet e tenta de novo." });
+        return;
+      }
+      let dados;
+      try {
+        dados = await r.json();
+      } catch (errLeitura) {
+        // o servidor respondeu, mas não com o resultado esperado (erro interno, tempo esgotado...)
+        dados = { erro: `Não consegui ler esse arquivo (erro ${r.status} no servidor) — não é sua internet. Tenta em OFX, se o banco oferecer, e me avisa.` };
+      }
+      setUltimoResultado(dados);
+      if (!dados.erro) aoProcessar();
+    } catch (err) {
+      setUltimoResultado({ erro: "Algo deu errado ao processar o arquivo — tenta de novo daqui a pouco." });
+    } finally {
+      setProcessando(false);
+      e.target.value = "";
+    }
+  }
+
+  return (
+    <div style={{ fontFamily: SANS, border: "2px dashed var(--primary)", borderRadius: "var(--radius)", padding: "26px 20px", textAlign: "center", marginBottom: 14, background: "var(--primary-soft)" }}>
+      <label style={{ cursor: "pointer" }}>
+        <input type="file" accept=".pdf,.ofx,.jpg,.jpeg,.png" onChange={selecionarArquivo} style={{ display: "none" }} disabled={processando} />
+        <div style={{ fontSize: 15, fontWeight: 600, marginBottom: 4, color: "var(--primary)" }}>
+          {processando ? "Processando..." : <><Icone nome="clipe" tamanho={18} style={{ marginRight: 6, marginTop: -2 }} />Toque para enviar um extrato (PDF, OFX ou foto)</>}
+        </div>
+        <div style={{ fontSize: 12, color: "var(--muted)" }}>Caixa, Sicoob, Santander, Sicredi, BB, PicPay — qualquer um</div>
+      </label>
+      {ultimoResultado && !ultimoResultado.erro && (
+        <div style={{ marginTop: 12, fontSize: 13, color: "var(--green)" }}>
+          Processado: {ultimoResultado.total_lancamentos} lançamentos, {ultimoResultado.categorizados_automaticamente} já categorizados
+          {ultimoResultado.pendencias_criadas > 0 && ` — ${ultimoResultado.pendencias_criadas} pra você confirmar abaixo`}
+        </div>
+      )}
+      {ultimoResultado?.erro && <div style={{ marginTop: 12, fontSize: 13, color: "var(--red)" }}>{ultimoResultado.erro}</div>}
+    </div>
+  );
+}
+
+function AreaGastoDinheiro({ usuarioId, aoProcessar }) {
+  const [texto, setTexto] = useState("");
+  const [enviando, setEnviando] = useState(false);
+  const [resultado, setResultado] = useState(null);
+
+  async function enviarTexto() {
+    if (!texto.trim()) return;
+    setEnviando(true);
+    setResultado(null);
+    try {
+      const r = await fetch(`${API_URL}/api/registrar-manual/${usuarioId}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ texto }),
+      });
+      const dados = await r.json();
+      setResultado(dados);
+      if (!dados.erro) { setTexto(""); aoProcessar(); }
+    } catch (e) {
+      setResultado({ erro: "Não consegui enviar — confere sua internet e tenta de novo." });
+    } finally {
+      setEnviando(false);
+    }
+  }
+
+  async function enviarFoto(e) {
+    const arquivo = e.target.files[0];
+    if (!arquivo) return;
+    setEnviando(true);
+    setResultado(null);
+    const form = new FormData();
+    form.append("foto", arquivo);
+    try {
+      const r = await fetch(`${API_URL}/api/registrar-manual/${usuarioId}`, { method: "POST", body: form });
+      const dados = await r.json();
+      setResultado(dados);
+      if (!dados.erro) aoProcessar();
+    } catch (err) {
+      setResultado({ erro: "Não consegui enviar — confere sua internet e tenta de novo." });
+    } finally {
+      setEnviando(false);
+      e.target.value = "";
+    }
+  }
+
+  return (
+    <div style={{ fontFamily: SANS, border: "1px solid var(--line)", borderRadius: "var(--radius)", boxShadow: "var(--shadow)", padding: "18px 20px", marginBottom: 24, background: "var(--paper)" }}>
+      <div style={{ fontSize: 14, fontWeight: 700, marginBottom: 10 }}><Icone nome="dinheiro" tamanho={18} style={{ marginRight: 6, marginTop: -2 }} />Registrar gasto em dinheiro</div>
+      <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+        <input
+          value={texto}
+          onChange={(e) => setTexto(e.target.value)}
+          onKeyDown={(e) => e.key === "Enter" && enviarTexto()}
+          placeholder='ex: "gastei 30 no mercado"'
+          disabled={enviando}
+          style={{ flex: 1, minWidth: 200, fontSize: 13, padding: "8px 10px", border: "1px solid var(--line)", background: "var(--bg)", color: "var(--ink)" }}
+        />
+        <button onClick={enviarTexto} disabled={enviando || !texto.trim()} style={{ fontSize: 13, background: "var(--primary)", color: "#fff", border: "none", padding: "8px 16px", cursor: "pointer" }}>
+          {enviando ? "..." : "registrar"}
+        </button>
+        <label style={{ fontSize: 13, background: "var(--bg)", border: "1px solid var(--line)", padding: "8px 16px", cursor: "pointer", color: "var(--ink)" }}>
+          <Icone nome="camera" tamanho={16} style={{ marginRight: 5, marginTop: -2 }} />foto do comprovante
+          <input type="file" accept=".jpg,.jpeg,.png" onChange={enviarFoto} style={{ display: "none" }} disabled={enviando} />
+        </label>
+      </div>
+      {resultado && !resultado.erro && (
+        <div style={{ marginTop: 10, fontSize: 13, color: "var(--green)" }}>
+          Registrado: {fmt2(resultado.valor)} — {resultado.descricao}
+          {resultado.categorizado ? ` (${resultado.categoria})` : " — vou perguntar a categoria abaixo"}
+        </div>
+      )}
+      {resultado?.erro && <div style={{ marginTop: 10, fontSize: 13, color: "var(--red)" }}>{resultado.erro}</div>}
+    </div>
+  );
+}
+
+function TelaNovoParticipante() {
+  const [nome, setNome] = useState("");
+  const [criando, setCriando] = useState(false);
+  const [linkGerado, setLinkGerado] = useState(null);
+
+  async function criar() {
+    if (!nome.trim()) return;
+    setCriando(true);
+    try {
+      const r = await fetch(`${API_URL}/api/usuarios`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ nome }),
+      });
+      const dados = await r.json();
+      const link = `${window.location.origin}${window.location.pathname}?usuario=${dados.usuario_id}`;
+      setLinkGerado(link);
+    } catch (e) {
+      alert("Não consegui criar agora — confere sua internet e tenta de novo.");
+    } finally {
+      setCriando(false);
+    }
+  }
+
+  return (
+    <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", padding: 24 }}>
+      <div style={{ maxWidth: 420, width: "100%", background: "var(--paper)", border: "1px solid var(--line)", borderRadius: "var(--radius)", boxShadow: "var(--shadow)", padding: 28 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
+          <LogoIcone tamanho={26} />
+          <div style={{ fontSize: 22, fontWeight: 800, letterSpacing: -0.4, color: "var(--primary)" }}>Assessor.IA</div>
+        </div>
+        <div style={{ fontFamily: SANS, fontSize: 14, color: "var(--muted)", marginBottom: 24 }}>
+          Nenhum participante identificado neste link. Se você é o Tiago testando com alguém novo, crie o acesso da pessoa abaixo.
+        </div>
+        {!linkGerado ? (
+          <>
+            <input
+              value={nome}
+              onChange={(e) => setNome(e.target.value)}
+              placeholder="Nome do participante"
+              style={{ width: "100%", fontFamily: SANS, fontSize: 14, padding: "10px 12px", border: "1px solid var(--line)", marginBottom: 10, background: "var(--bg)", color: "var(--ink)" }}
+            />
+            <button onClick={criar} disabled={criando} style={{ width: "100%", fontFamily: SANS, fontSize: 14, fontWeight: 600, background: "var(--primary)", color: "#fff", border: "none", padding: "12px", cursor: "pointer" }}>
+              {criando ? "Criando..." : "Criar acesso"}
+            </button>
+          </>
+        ) : (
+          <div style={{ fontFamily: SANS, fontSize: 13 }}>
+            Pronto! Manda esse link pra pessoa (ela é só dela, ninguém mais vê):
+            <div style={{ marginTop: 8, padding: 10, borderRadius: "var(--radius-sm)", background: "var(--primary-soft)", color: "var(--primary)", wordBreak: "break-all" }}>{linkGerado}</div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// Ícone do Assessor.IA — escudo com um "check", reaproveitado na barra
+// lateral (desktop) e na tela de novo participante.
+function LogoIcone({ tamanho = 26 }) {
+  return (
+    <svg width={tamanho} height={tamanho} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M12 2L4 5v6c0 5.2 3.4 9.8 8 11 4.6-1.2 8-5.8 8-11V5l-8-3z" fill="var(--primary)" />
+      <path d="M8.5 12.3l2.4 2.4L16 9.3" stroke="#fff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+    </svg>
+  );
+}
+
+// Barra de navegação fixa embaixo, no estilo de app de celular — usada em
+// telas estreitas. As páginas de verdade (Início, Lançamentos) ficam lado
+// a lado com os itens "em breve" (Educação, Orçamentos), esmaecidos e
+// desabilitados, só pra dar a ideia de onde o produto vai chegar.
+function BottomNav({ ativa, aoTrocar }) {
+  const itens = NAV_ITENS.filter((it) => it.mobile);
+  // botão "+" no meio leva direto pra Lançamentos (enviar extrato / gasto em dinheiro)
+  const comMais = [...itens.slice(0, 2), { id: "__mais__" }, ...itens.slice(2)];
+  return (
+    <div className="app-bottomnav" style={{ position: "fixed", left: 0, right: 0, bottom: 0, zIndex: 40, background: "var(--paper)", borderTop: "1px solid var(--line)", paddingBottom: "env(safe-area-inset-bottom, 0px)" }}>
+      <div style={{ maxWidth: 560, margin: "0 auto", display: "flex", alignItems: "center" }}>
+        {comMais.map((it) => {
+          if (it.id === "__mais__") {
+            return (
+              <div key="mais" style={{ flex: 1, display: "flex", justifyContent: "center" }}>
+                <button onClick={() => aoTrocar("lancamentos")} aria-label="Lançar extrato ou gasto"
+                  style={{ width: 48, height: 48, marginTop: -18, borderRadius: 16, border: "none", background: "var(--hero)", color: "#fff", cursor: "pointer", boxShadow: "0 6px 16px rgba(0,0,0,0.18)", display: "grid", placeItems: "center" }}>
+                  <Icone nome="mais" tamanho={22} espessura={2.4} />
+                </button>
+              </div>
+            );
+          }
+          const ativoAgora = ativa === it.id;
+          return (
+            <button
+              key={it.id}
+              onClick={() => it.ativo && aoTrocar(it.id)}
+              disabled={!it.ativo}
+              title={it.ativo ? undefined : "em breve"}
+              style={{
+                flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 3, padding: "8px 0 8px",
+                background: "none", border: "none", cursor: it.ativo ? "pointer" : "not-allowed", fontFamily: SANS,
+                color: ativoAgora ? "var(--primary)" : "var(--muted)", opacity: it.ativo ? 1 : 0.5,
+              }}
+            >
+              <span style={{ display: "grid", placeItems: "center", width: 52, height: 28, borderRadius: 999, background: ativoAgora ? "var(--primary-soft)" : "transparent", transition: "background .2s" }}>
+                <Icone nome={it.icone} tamanho={21} espessura={ativoAgora ? 2.1 : 1.7} />
+              </span>
+              <span style={{ fontSize: 10.5, fontWeight: ativoAgora ? 700 : 500 }}>{it.label}</span>
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+// Barra lateral fixa — só aparece em telas largas (ver .app-sidebar no
+// CSS), no lugar da barra debaixo.
+function Sidebar({ ativa, aoTrocar }) {
+  return (
+    <div className="app-sidebar" style={{ position: "fixed", top: 0, left: 0, bottom: 0, width: 200, padding: "22px 12px", background: "var(--paper)", borderRight: "1px solid var(--line)", flexDirection: "column", gap: 4, zIndex: 30 }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "2px 8px", marginBottom: 22 }}>
+        <LogoIcone tamanho={24} />
+        <span style={{ fontSize: 16, fontWeight: 800, letterSpacing: -0.3, fontFamily: SANS }}>Assessor<span style={{ color: "var(--primary)" }}>.IA</span></span>
+      </div>
+      {NAV_ITENS.map((it) => {
+        const ativoAgora = ativa === it.id;
+        return (
+          <button
+            key={it.id}
+            onClick={() => it.ativo && aoTrocar(it.id)}
+            disabled={!it.ativo}
+            title={it.ativo ? undefined : "em breve"}
+            style={{
+              display: "flex", alignItems: "center", gap: 10, padding: "10px 10px", borderRadius: "var(--radius-sm)",
+              border: "none", background: ativoAgora ? "var(--primary-soft)" : "transparent",
+              color: ativoAgora ? "var(--primary)" : (it.ativo ? "var(--ink)" : "var(--muted)"),
+              fontFamily: SANS, fontSize: 13.5, fontWeight: ativoAgora ? 700 : 500, textAlign: "left",
+              cursor: it.ativo ? "pointer" : "not-allowed", opacity: it.ativo ? 1 : 0.55,
+            }}
+          >
+            <Icone nome={it.icone} tamanho={19} espessura={ativoAgora ? 2.1 : 1.7} />
+            {it.label}
+            {!it.ativo && <span style={{ marginLeft: "auto", fontSize: 8.5, fontWeight: 700, color: "var(--muted)", textTransform: "uppercase", letterSpacing: 0.3 }}>em breve</span>}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+function TituloSecao({ children, sub }) {
+  return (
+    <div style={{ marginBottom: 16 }}>
+      <div style={{ fontSize: 19, fontWeight: 800, letterSpacing: -0.3, marginBottom: sub ? 4 : 0 }}>{children}</div>
+      {sub && <div style={{ fontFamily: SANS, fontSize: 13, color: "var(--muted)" }}>{sub}</div>}
+    </div>
+  );
+}
+
+// Widget "Contas a vencer" do dashboard — pendentes nos próximos 15 dias
+// (e atrasadas, destacadas em vermelho). "já paguei" é o fallback manual
+// pra quando a baixa automática não casou sozinha com o extrato.
+function WidgetContasAVencer({ usuarioId }) {
+  const [itens, setItens] = useState(null);
+  const [pagando, setPagando] = useState(null);
+
+  function carregar() {
+    fetch(`${API_URL}/api/contas-a-vencer/${usuarioId}?dias=15`)
+      .then((r) => r.json())
+      .then((lista) => setItens(Array.isArray(lista) ? lista : []))
+      .catch(() => setItens([]));
+  }
+  useEffect(carregar, [usuarioId]);
+
+  async function jaPaguei(baixaId) {
+    setPagando(baixaId);
+    try {
+      await fetch(`${API_URL}/api/contas-fixas/${usuarioId}/baixar`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ baixa_id: baixaId }),
+      });
+      carregar();
+    } catch (e) {
+      alert("Não consegui confirmar — confere sua internet e tenta de novo.");
+    } finally {
+      setPagando(null);
+    }
+  }
+
+  function diasAte(dataISO) {
+    const hoje = new Date(); hoje.setHours(0, 0, 0, 0);
+    return Math.round((new Date(dataISO + "T00:00:00") - hoje) / 86400000);
+  }
+  function rotuloData(dataISO, atrasada) {
+    const dias = diasAte(dataISO);
+    if (atrasada) return `venceu em ${new Date(dataISO + "T00:00:00").toLocaleDateString("pt-BR")}`;
+    if (dias === 0) return "vence hoje";
+    if (dias === 1) return "vence amanhã";
+    return `vence em ${dias} dias`;
+  }
+
+  if (!itens) return null;
+
+  return (
+    <div style={CARTAO}>
+      <div style={{ ...ROTULO, marginBottom: 4 }}>Contas a vencer</div>
+      {itens.length === 0 && (
+        <div style={{ fontSize: 12.5, color: "var(--muted)", padding: "6px 0" }}>Nenhuma conta fixa vencendo nos próximos 15 dias.</div>
+      )}
+      {itens.map((it, i) => {
+        const urgente = it.atrasada || diasAte(it.data_vencimento) <= 2;
+        return (
+          <div key={it.baixa_id} style={{ display: "flex", alignItems: "center", gap: 10, padding: "9px 0", borderTop: i ? "1px solid var(--line)" : "none" }}>
+            <span style={{ width: 34, height: 34, borderRadius: 10, flex: "none", display: "grid", placeItems: "center", fontWeight: 800, fontSize: 12.5,
+              background: urgente ? "var(--red)" : "var(--track)", color: urgente ? "#fff" : "var(--ink)" }}>
+              {it.data_vencimento.slice(8, 10)}
+            </span>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ fontSize: 13, fontWeight: 700 }}>{it.eh_fatura_cartao && <Icone nome="cartao" tamanho={15} style={{ marginRight: 5, marginTop: -2 }} />}{it.nome}</div>
+              <div style={{ fontSize: 11.5, color: it.atrasada ? "var(--red)" : "var(--muted)", fontWeight: it.atrasada ? 600 : 400 }}>
+                {rotuloData(it.data_vencimento, it.atrasada)}{it.valor_esperado ? ` · ~${fmt2(it.valor_esperado)}` : ""}
+              </div>
+            </div>
+            <button
+              onClick={() => jaPaguei(it.baixa_id)}
+              disabled={pagando === it.baixa_id}
+              style={{ fontSize: 11.5, background: "var(--bg)", color: "var(--ink)", border: "1px solid var(--line)", padding: "6px 10px", cursor: "pointer", whiteSpace: "nowrap" }}
+            >
+              {pagando === it.baixa_id ? "..." : "já paguei"}
+            </button>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+// Página 1 — Início: saldo, rosca de categorias, ritmo do mês, pontos de
+// atenção, categorias x média e contas a vencer. O alternador "Este mês /
+// Desde o início" continua: no "desde o início" saem o ritmo e a média,
+// que só fazem sentido mês a mês.
+function PaginaDashboard({ usuarioId, mesAtual, periodo, historico, painel, carregando, aoAbrirDetalhe, visao, setVisao, aoEscolherMes }) {
+  const [gerenciandoSaldo, setGerenciandoSaldo] = useState(false);
+  const [versaoSaldo, setVersaoSaldo] = useState(0);
+  const temMes = !!mesAtual;
+  const ehMes = visao === "mes" && temMes;
+  const dadosView = ehMes ? mesAtual : periodo;
+  const painelDoMes = ehMes && painel && painel.mes === mesAtual.mes ? painel : null;
+  const mesDetalhe = ehMes ? mesAtual.mes : null;
+  const abrir = (tipo) => (cat) => aoAbrirDetalhe({ categoria: cat, mes: mesDetalhe, tipo });
+
+  // categorias com a média (quando o painel do mês veio) ou só o valor
+  const categorias = painelDoMes
+    ? painelDoMes.categorias
+    : (dadosView ? dadosView.categorias.map((c) => ({ ...c, media: null, dif: null })) : []);
+  const vazio = !dadosView || (dadosView.receita_total === 0 && dadosView.despesa_total === 0 && categorias.length === 0);
+
+  return (
+    <div>
+      <div style={{ display: "flex", background: "var(--paper)", border: "1px solid var(--line)", borderRadius: 999, padding: 3, marginBottom: 14, maxWidth: 320 }}>
+        {[["mes", "Este mês", temMes], ["periodo", "Desde o início", true]].map(([v, rotulo, pode]) => (
+          <button key={v} onClick={() => setVisao(v)} disabled={!pode}
+            style={{ flex: 1, padding: "7px 0", fontSize: 12.5, fontWeight: 700, border: "none", borderRadius: 999, cursor: pode ? "pointer" : "not-allowed", fontFamily: SANS, background: (v === "mes") === ehMes ? "var(--primary)" : "transparent", color: (v === "mes") === ehMes ? "#fff" : "var(--muted)" }}>
+            {rotulo}
+          </button>
+        ))}
+      </div>
+
+      <div className={ehMes ? "dash" : "dash periodo"}>
+        <div className="d-hero" style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+          <HeroSaldo usuarioId={usuarioId} dadosView={dadosView} rotuloPeriodo={ehMes ? "no mês" : "no período"} versaoSaldo={versaoSaldo}
+            gerenciando={gerenciandoSaldo} aoGerenciar={() => setGerenciandoSaldo((g) => !g)} />
+          {gerenciandoSaldo && <WidgetSaldoDisponivel usuarioId={usuarioId} aoMudar={() => setVersaoSaldo((v) => v + 1)} />}
+        </div>
+
+        {vazio && !carregando && (
+          <div className="d-alertas" style={{ ...CARTAO, fontSize: 14, color: "var(--muted)" }}>
+            Nenhum extrato processado ainda. Toque em "+" (ou vá em Lançamentos) e envie um arquivo pra começar.
+          </div>
+        )}
+
+        {!vazio && ehMes && <PontosDeAtencao painel={painelDoMes} aoClicar={abrir("D")} />}
+
+        {!vazio && !ehMes && historico && historico.length > 1 && (
+          <CartaoMesAMes historico={historico} mesCorrente={new Date().toISOString().slice(0, 7)} aoEscolherMes={aoEscolherMes} />
+        )}
+
+        {!vazio && categorias.length > 0 && (
+          <CartaoRosca categorias={categorias} total={dadosView.despesa_total} rotulo={ehMes ? "gasto no mês" : "gasto no período"} aoClicar={abrir("D")} />
+        )}
+
+        {!vazio && categorias.length > 0 && (
+          <CategoriasVsMedia categorias={categorias} comMedia={!!painelDoMes && painelDoMes.meses_historico > 0} aoClicar={abrir("D")} />
+        )}
+
+        {!vazio && painelDoMes && <CartaoRitmo painel={painelDoMes} />}
+
+        <div className="d-lado">
+          <WidgetContasAVencer usuarioId={usuarioId} />
+          {!vazio && dadosView.categorias_receita && dadosView.categorias_receita.length > 0 && (
+            <div style={CARTAO}>
+              <div style={{ ...ROTULO, marginBottom: 10 }}>Entradas {ehMes ? "do mês" : "do período"}</div>
+              {dadosView.categorias_receita.map((c) => (
+                <button key={c.nome} onClick={() => abrir("C")(c.nome)}
+                  style={{ display: "block", width: "100%", padding: "6px 0", background: "none", border: "none", color: "var(--ink)", fontFamily: SANS, textAlign: "left", cursor: "pointer" }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", gap: 8, fontSize: 13 }}>
+                    <span style={{ fontWeight: 600, minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{c.nome}</span>
+                    <b style={{ whiteSpace: "nowrap" }}>{fmt(c.valor)}</b>
+                  </div>
+                  <div style={{ height: 6, background: "var(--track)", borderRadius: 6, marginTop: 5 }}>
+                    <div style={{ height: "100%", width: `${(c.valor / Math.max(...dadosView.categorias_receita.map((r) => r.valor), 1)) * 100}%`, background: "var(--green)", borderRadius: 6 }} />
+                  </div>
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// Página 2 — Lançamentos: onde se trabalha de verdade — subir extrato,
+// registrar gasto em dinheiro, responder pendências e corrigir/detalhar
+// categoria por categoria do mês selecionado.
+// Cadastro e gerenciamento das contas fixas — cadastra uma vez (nome,
+// categoria/subgrupo, dia do vencimento, valor esperado opcional) e a
+// baixa automática cuida do resto quando o pagamento aparecer no extrato.
+function SecaoContasFixas({ usuarioId, categorias }) {
+  const [contas, setContas] = useState(null);
+  const [mostrarForm, setMostrarForm] = useState(false);
+  const [editandoId, setEditandoId] = useState(null); // null = cadastrando nova; id = editando essa
+  const [nome, setNome] = useState("");
+  const [categoria, setCategoria] = useState("");
+  const [subgrupos, setSubgrupos] = useState([]);
+  const [subcategoria, setSubcategoria] = useState("");
+  const [diaVencimento, setDiaVencimento] = useState("");
+  const [valorEsperado, setValorEsperado] = useState("");
+  const [ehFaturaCartao, setEhFaturaCartao] = useState(false);
+  const [salvando, setSalvando] = useState(false);
+  const [confirmandoExclusaoId, setConfirmandoExclusaoId] = useState(null);
+  const [excluindo, setExcluindo] = useState(false);
+
+  function carregarContas() {
+    fetch(`${API_URL}/api/contas-fixas/${usuarioId}`)
+      .then((r) => r.json())
+      .then((lista) => setContas(Array.isArray(lista) ? lista : []))
+      .catch(() => setContas([]));
+  }
+  useEffect(carregarContas, [usuarioId]);
+
+  useEffect(() => {
+    if (!categoria) { setSubgrupos([]); return; }
+    fetch(`${API_URL}/api/subcategorias/${usuarioId}?categoria=${encodeURIComponent(categoria)}`)
+      .then((r) => r.json())
+      .then((lista) => setSubgrupos(Array.isArray(lista) ? lista : []))
+      .catch(() => setSubgrupos([]));
+  }, [categoria]);
+
+  function limparFormulario() {
+    setNome(""); setCategoria(""); setSubcategoria(""); setDiaVencimento(""); setValorEsperado(""); setEhFaturaCartao(false);
+    setEditandoId(null);
+    setMostrarForm(false);
+  }
+
+  function iniciarEdicao(conta) {
+    setEditandoId(conta.id);
+    setNome(conta.nome);
+    setEhFaturaCartao(!!conta.eh_fatura_cartao);
+    setCategoria(conta.eh_fatura_cartao ? "" : (conta.categoria || ""));
+    setSubcategoria(conta.eh_fatura_cartao ? "" : (conta.subcategoria || ""));
+    setDiaVencimento(String(conta.dia_vencimento));
+    setValorEsperado(conta.valor_esperado != null ? String(conta.valor_esperado) : "");
+    setConfirmandoExclusaoId(null);
+    setMostrarForm(true);
+  }
+
+  async function salvar() {
+    if (!nome.trim() || !diaVencimento || (!ehFaturaCartao && !categoria)) return;
+    setSalvando(true);
+    try {
+      const url = editandoId ? `${API_URL}/api/contas-fixas/${usuarioId}/${editandoId}` : `${API_URL}/api/contas-fixas/${usuarioId}`;
+      const r = await fetch(url, {
+        method: editandoId ? "PUT" : "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          nome, categoria, subcategoria: subcategoria || null,
+          dia_vencimento: parseInt(diaVencimento, 10),
+          valor_esperado: valorEsperado ? parseFloat(valorEsperado) : null,
+          eh_fatura_cartao: ehFaturaCartao,
+        }),
+      });
+      const dados = await r.json();
+      if (dados.erro) { alert(dados.erro); return; }
+      limparFormulario();
+      carregarContas();
+    } catch (e) {
+      alert("Não consegui salvar — confere sua internet e tenta de novo.");
+    } finally {
+      setSalvando(false);
+    }
+  }
+
+  async function alternarAtiva(conta) {
+    try {
+      await fetch(`${API_URL}/api/contas-fixas/${usuarioId}/${conta.id}/ativa`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ativo: !conta.ativo }),
+      });
+      carregarContas();
+    } catch (e) {
+      alert("Não consegui atualizar — confere sua internet e tenta de novo.");
+    }
+  }
+
+  async function excluirConta(contaId) {
+    setExcluindo(true);
+    try {
+      const r = await fetch(`${API_URL}/api/contas-fixas/${usuarioId}/${contaId}`, { method: "DELETE" });
+      const dados = await r.json();
+      if (dados.erro) { alert(dados.erro); return; }
+      setConfirmandoExclusaoId(null);
+      carregarContas();
+    } catch (e) {
+      alert("Não consegui excluir — confere sua internet e tenta de novo.");
+    } finally {
+      setExcluindo(false);
+    }
+  }
+
+  return (
+    <div style={{ marginTop: 32 }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 10 }}>
+        <TituloSecao sub="cadastre uma vez e a baixa acontece sozinha quando o pagamento aparecer no extrato">
+          Contas fixas
+        </TituloSecao>
+        <button
+          onClick={() => (mostrarForm ? limparFormulario() : setMostrarForm(true))}
+          style={{ fontSize: 12.5, fontWeight: 600, background: mostrarForm ? "var(--bg)" : "var(--primary)", color: mostrarForm ? "var(--muted)" : "#fff", border: mostrarForm ? "1px solid var(--line)" : "none", padding: "7px 12px", cursor: "pointer", whiteSpace: "nowrap" }}
+        >
+          {mostrarForm ? "cancelar" : "+ nova conta"}
+        </button>
+      </div>
+
+      {mostrarForm && (
+        <div style={{ background: "var(--paper)", border: "1px solid var(--line)", borderRadius: "var(--radius)", boxShadow: "var(--shadow)", padding: 16, marginBottom: 14, display: "flex", flexDirection: "column", gap: 8 }}>
+          {editandoId && <div style={{ fontSize: 11.5, fontWeight: 700, color: "var(--primary)", textTransform: "uppercase", letterSpacing: 0.4 }}>editando conta</div>}
+          <input
+            value={nome}
+            onChange={(e) => setNome(e.target.value)}
+            placeholder="Nome (ex: Água, Internet, Academia)"
+            style={{ fontSize: 13, padding: "8px 10px", border: "1px solid var(--line)", background: "var(--bg)", color: "var(--ink)" }}
+          />
+          <label style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 12.5, color: "var(--ink)", cursor: "pointer", padding: "2px 2px" }}>
+            <input
+              type="checkbox"
+              checked={ehFaturaCartao}
+              onChange={(e) => { setEhFaturaCartao(e.target.checked); if (e.target.checked) { setCategoria(""); setSubcategoria(""); } }}
+              style={{ width: 15, height: 15 }}
+            />
+            <Icone nome="cartao" tamanho={16} /> é a fatura do cartão de crédito
+          </label>
+          {ehFaturaCartao ? (
+            <div style={{ fontSize: 11.5, color: "var(--muted)" }}>
+              quando o pagamento em bloco da fatura aparecer no extrato, ele já entra contado normalmente — e se você também enviar a fatura detalhada daquele mês, o app troca sozinho pro detalhamento item a item (sem contar o gasto duas vezes)
+            </div>
+          ) : (
+            <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+              <select
+                value={categoria}
+                onChange={(e) => { setCategoria(e.target.value); setSubcategoria(""); }}
+                style={{ flex: 1, minWidth: 140, fontSize: 13, padding: "8px 10px", border: "1px solid var(--line)", background: "var(--bg)", color: "var(--ink)" }}
+              >
+                <option value="">categoria...</option>
+                {(categorias.despesa || []).map((c) => <option key={c} value={c}>{c}</option>)}
+              </select>
+              <select
+                value={subcategoria}
+                onChange={(e) => setSubcategoria(e.target.value)}
+                disabled={!categoria}
+                style={{ flex: 1, minWidth: 140, fontSize: 13, padding: "8px 10px", border: "1px solid var(--line)", background: "var(--bg)", color: "var(--ink)" }}
+              >
+                <option value="">sem subgrupo</option>
+                {subgrupos.map((s) => <option key={s} value={s}>{s}</option>)}
+              </select>
+            </div>
+          )}
+          <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+            <input
+              type="number" min="1" max="31" value={diaVencimento}
+              onChange={(e) => setDiaVencimento(e.target.value)}
+              placeholder="dia do vencimento (1-31)"
+              style={{ flex: 1, minWidth: 140, fontSize: 13, padding: "8px 10px", border: "1px solid var(--line)", background: "var(--bg)", color: "var(--ink)" }}
+            />
+            <input
+              type="number" step="0.01" value={valorEsperado}
+              onChange={(e) => setValorEsperado(e.target.value)}
+              placeholder="valor esperado (opcional)"
+              style={{ flex: 1, minWidth: 140, fontSize: 13, padding: "8px 10px", border: "1px solid var(--line)", background: "var(--bg)", color: "var(--ink)" }}
+            />
+          </div>
+          <div style={{ fontSize: 11.5, color: "var(--muted)" }}>
+            deixe o valor em branco se ele varia todo mês (ex: água, luz) — sem valor, a baixa casa só pela categoria/subgrupo do mês
+          </div>
+          <button
+            onClick={salvar}
+            disabled={salvando || !nome.trim() || !diaVencimento || (!ehFaturaCartao && !categoria)}
+            style={{ fontSize: 13, fontWeight: 600, background: "var(--primary)", color: "#fff", border: "none", padding: "9px 14px", cursor: "pointer" }}
+          >
+            {salvando ? "..." : editandoId ? "salvar alterações" : "cadastrar conta"}
+          </button>
+        </div>
+      )}
+
+      {contas === null && <div style={{ fontSize: 13, color: "var(--muted)" }}>carregando...</div>}
+      {contas && contas.length === 0 && !mostrarForm && (
+        <div style={{ fontFamily: SANS, fontSize: 13, color: "var(--muted)" }}>nenhuma conta fixa cadastrada ainda</div>
+      )}
+      {contas && contas.map((c) => (
+        <div
+          key={c.id}
+          style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 10, padding: "10px 14px", borderRadius: "var(--radius-sm)", background: "var(--paper)", border: "1px solid var(--line)", marginBottom: 6, opacity: c.ativo ? 1 : 0.55 }}
+        >
+          {confirmandoExclusaoId === c.id ? (
+            <div style={{ display: "flex", gap: 6, flexWrap: "wrap", alignItems: "center", width: "100%" }}>
+              <div style={{ flex: 1, minWidth: 160, fontSize: 12, color: "var(--ink)" }}>
+                excluir "{c.nome}"? os lançamentos já feitos continuam intactos, só o cadastro e as baixas pendentes somem.
+              </div>
+              <button onClick={() => excluirConta(c.id)} disabled={excluindo} style={{ fontSize: 11.5, background: "var(--red)", color: "#fff", border: "none", padding: "6px 10px", cursor: "pointer" }}>
+                {excluindo ? "..." : "excluir"}
+              </button>
+              <button onClick={() => setConfirmandoExclusaoId(null)} style={{ fontSize: 11.5, background: "var(--bg)", color: "var(--muted)", border: "1px solid var(--line)", padding: "6px 10px", cursor: "pointer" }}>
+                cancelar
+              </button>
+            </div>
+          ) : (
+            <>
+              <div>
+                <div style={{ fontSize: 13, fontWeight: 600 }}>{c.nome}</div>
+                <div style={{ fontSize: 11.5, color: "var(--muted)" }}>
+                  {c.eh_fatura_cartao ? <><Icone nome="cartao" tamanho={14} style={{ marginTop: -2 }} /> fatura do cartão</> : `${c.categoria}${c.subcategoria ? ` · ${c.subcategoria}` : ""}`} · todo dia {c.dia_vencimento}
+                  {c.valor_esperado ? ` · ~${fmt2(c.valor_esperado)}` : ""}
+                </div>
+              </div>
+              <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+                <button onClick={() => iniciarEdicao(c)} title="editar" style={{ background: "none", border: "none", cursor: "pointer", fontSize: 14, color: "var(--muted)", padding: 4 }}>
+                  <Icone nome="editar" tamanho={16} />
+                </button>
+                <button onClick={() => setConfirmandoExclusaoId(c.id)} title="excluir" style={{ background: "none", border: "none", cursor: "pointer", fontSize: 14, color: "var(--muted)", padding: 4 }}>
+                  <Icone nome="lixeira" tamanho={16} />
+                </button>
+                <button
+                  onClick={() => alternarAtiva(c)}
+                  style={{ fontSize: 11.5, background: "var(--bg)", color: "var(--muted)", border: "1px solid var(--line)", padding: "5px 10px", cursor: "pointer", whiteSpace: "nowrap" }}
+                >
+                  {c.ativo ? "pausar" : "reativar"}
+                </button>
+              </div>
+            </>
+          )}
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function PaginaLancamentos({ usuarioId, mesAtual, pendentes, categorias, aoProcessar, aoResponderPergunta, aoCriarCategoria, aoAbrirDetalhe }) {
+  const temCategorias = mesAtual && (mesAtual.categorias.length > 0 || (mesAtual.categorias_receita && mesAtual.categorias_receita.length > 0));
+  return (
+    <div>
+      <AreaUpload usuarioId={usuarioId} aoProcessar={aoProcessar} />
+      <AreaGastoDinheiro usuarioId={usuarioId} aoProcessar={aoProcessar} />
+
+      <TituloSecao sub={pendentes.length > 0 ? "responda direto aqui — fica guardado pra da próxima vez" : "nada pendente no momento"}>
+        Preciso confirmar com você
+      </TituloSecao>
+      {pendentes.map((p) => (
+        <CartaoPergunta key={p.id} pergunta={p} usuarioId={usuarioId} categorias={categorias} aoResponder={aoResponderPergunta} aoCriarCategoria={aoCriarCategoria} />
+      ))}
+
+      <SecaoContasFixas usuarioId={usuarioId} categorias={categorias} />
+
+      {temCategorias && (
+        <div style={{ marginTop: 32 }}>
+          <TituloSecao sub="toque numa categoria pra ver, corrigir ou excluir os lançamentos do mês">
+            Detalhamento do mês
+          </TituloSecao>
+          {mesAtual.categorias.length > 0 && (
+            <>
+              <div style={{ fontSize: 12, fontWeight: 700, color: "var(--muted)", textTransform: "uppercase", letterSpacing: 0.6, marginBottom: 10 }}>Despesas</div>
+              <GraficoCategorias dados={mesAtual.categorias} cor="var(--primary)"
+                onClicarCategoria={(cat) => aoAbrirDetalhe({ categoria: cat, mes: mesAtual.mes, tipo: "D" })} />
+            </>
+          )}
+          {mesAtual.categorias_receita && mesAtual.categorias_receita.length > 0 && (
+            <>
+              <div style={{ fontSize: 12, fontWeight: 700, color: "var(--muted)", textTransform: "uppercase", letterSpacing: 0.6, marginBottom: 10, marginTop: 28 }}>Receitas</div>
+              <GraficoCategorias dados={mesAtual.categorias_receita} cor="var(--green)"
+                onClicarCategoria={(cat) => aoAbrirDetalhe({ categoria: cat, mes: mesAtual.mes, tipo: "C" })} />
+            </>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function PainelAssessorIA() {
+  const params = new URLSearchParams(window.location.search);
+  const usuarioId = params.get("usuario");
+
+  const [dados, setDados] = useState(RESUMO_VAZIO);
+  const [carregando, setCarregando] = useState(true);
+  const [meses, setMeses] = useState([]);
+  const [mesEscolhido, setMesEscolhido] = useState(null); // null = mais recente
+  const [detalheAberto, setDetalheAberto] = useState(null); // { categoria, mes } | null
+  const [categorias, setCategorias] = useState({ despesa: CATEGORIAS_DESPESA_PADRAO, receita: CATEGORIAS_RECEITA_PADRAO });
+  const [pagina, setPagina] = useState("dashboard"); // "dashboard" | "lancamentos" — as duas páginas do app
+  const [painel, setPainel] = useState(null); // gráficos e pontos de atenção do mês (/api/painel)
+  const [visao, setVisao] = useState("mes"); // "mes" | "periodo" — alternador do Início
+
+  async function carregarCategorias() {
+    try {
+      const r = await fetch(`${API_URL}/api/categorias/${usuarioId}`);
+      setCategorias(await r.json());
+    } catch (e) { /* silencioso — cai no padrão */ }
+  }
+
+  async function carregarResumo(mes) {
+    try {
+      const qs = mes ? `?mes=${mes}` : "";
+      const r = await fetch(`${API_URL}/api/resumo/${usuarioId}${qs}`);
+      const d = await r.json();
+      setDados(d);
+      if (d.mes_atual && !mesEscolhido) setMesEscolhido(d.mes_atual.mes);
+      if (d.mes_atual) {
+        fetch(`${API_URL}/api/painel/${usuarioId}?mes=${d.mes_atual.mes}`)
+          .then((r) => r.json())
+          .then(setPainel)
+          .catch(() => setPainel(null)); // sem o painel, o Início só não mostra ritmo/média/alertas
+      } else {
+        setPainel(null);
+      }
+    } catch (e) {
+      setDados(RESUMO_VAZIO);
+    } finally {
+      setCarregando(false);
+    }
+  }
+
+  async function carregarMeses() {
+    try {
+      const r = await fetch(`${API_URL}/api/meses/${usuarioId}`);
+      setMeses(await r.json());
+    } catch (e) { /* silencioso — o seletor só não aparece */ }
+  }
+
+  useEffect(() => {
+    if (usuarioId) { carregarResumo(); carregarMeses(); carregarCategorias(); }
+    else setCarregando(false);
+  }, [usuarioId]);
+
+  function trocarMes(novoMes) {
+    setMesEscolhido(novoMes);
+    setCarregando(true);
+    carregarResumo(novoMes);
+  }
+
+  function aoResponderPergunta(perguntaId) {
+    setDados((d) => ({ ...d, pendencias: d.pendencias.filter((p) => p.id !== perguntaId) }));
+    setTimeout(() => carregarResumo(mesEscolhido), 300);
+  }
+
+  if (!usuarioId) return <TelaNovoParticipante />;
+
+  const mesAtual = dados.mes_atual;
+  const pendentes = dados.pendencias || [];
+  const aoProcessar = () => { carregarResumo(mesEscolhido); carregarMeses(); };
+
+  return (
+    <div style={{ minHeight: "100vh" }}>
+      <Sidebar ativa={pagina} aoTrocar={setPagina} />
+
+      <div className="app-main">
+
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 12, marginBottom: 18 }}>
+          <div style={{ minWidth: 0 }}>
+            <div style={{ fontSize: 22, fontWeight: 800, letterSpacing: -0.5 }}>
+              {pagina === "dashboard" ? (dados.usuario_nome ? `Oi, ${dados.usuario_nome.split(" ")[0]}!` : "Oi!") : "Lançamentos"}
+            </div>
+            <div style={{ fontSize: 13, color: "var(--muted)" }}>
+              {carregando ? "carregando..." : pagina !== "dashboard" ? "envie extratos, registre gastos e confirme o que ficou pendente"
+                : visao === "periodo" || !mesAtual ? "Seu dinheiro desde o primeiro extrato."
+                : painel && painel.mes === mesAtual.mes && painel.mes_corrente ? `Seu dinheiro em ${nomeMesLongo(mesAtual.mes)}, até o dia ${painel.dia_referencia}.`
+                : `Seu dinheiro em ${nomeMesLongo(mesAtual.mes)}.`}
+            </div>
+          </div>
+          <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+            <BotaoTema />
+            {pagina === "dashboard" && visao === "mes" && mesAtual && meses.length > 1 && (
+              <select
+                value={mesEscolhido || mesAtual.mes}
+                onChange={(e) => trocarMes(e.target.value)}
+                aria-label="Escolher mês"
+                style={{ fontFamily: SANS, fontSize: 12.5, fontWeight: 700, color: "var(--ink)", background: "var(--paper)", border: "1px solid var(--line)", borderRadius: 999, padding: "7px 12px", textTransform: "capitalize" }}
+              >
+                {meses.map((m) => <option key={m} value={m}>{nomeMes(m)}</option>)}
+              </select>
+            )}
+            {pagina === "dashboard" && (
+              <button onClick={() => setPagina("lancamentos")} className="so-desktop"
+                style={{ fontSize: 12.5, fontWeight: 700, background: "var(--primary)", color: "#fff", border: "none", borderRadius: 999, padding: "8px 14px", cursor: "pointer" }}>
+                + Enviar extrato
+              </button>
+            )}
+          </div>
+        </div>
+
+        {pagina === "dashboard" ? (
+          <PaginaDashboard
+            usuarioId={usuarioId} mesAtual={mesAtual} periodo={dados.periodo_completo} historico={dados.historico_mensal} painel={painel}
+            carregando={carregando} aoAbrirDetalhe={setDetalheAberto} visao={visao} setVisao={setVisao}
+            aoEscolherMes={(m) => { setVisao("mes"); trocarMes(m); }}
+          />
+        ) : (
+          <div className="pagina-estreita">
+            <PaginaLancamentos
+              usuarioId={usuarioId} mesAtual={mesAtual} pendentes={pendentes} categorias={categorias}
+              aoProcessar={aoProcessar} aoResponderPergunta={aoResponderPergunta}
+              aoCriarCategoria={carregarCategorias} aoAbrirDetalhe={setDetalheAberto}
+            />
+          </div>
+        )}
+
+        {detalheAberto && (
+          <PainelDetalheCategoria usuarioId={usuarioId} categoria={detalheAberto.categoria} mes={detalheAberto.mes} tipo={detalheAberto.tipo} categorias={categorias}
+            aoFechar={() => setDetalheAberto(null)} aoCorrigir={() => carregarResumo(mesEscolhido)} />
+        )}
+
+      </div>
+
+      <BottomNav ativa={pagina} aoTrocar={setPagina} />
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<PainelAssessorIA />);
+</script>
+</body>
+</html>
